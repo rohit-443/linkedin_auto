@@ -2,8 +2,8 @@ name: Daily LinkedIn Interview Questions
 
 on:
   schedule:
-    # Runs at 2:30 AM, 10:30 AM, and 6:30 PM UTC
-    - cron: '30 2,10,18 * * *'
+    # Runs at 2:30 AM and 2:30 PM UTC
+    - cron: '30 2,14 * * *'
   workflow_dispatch: # Allows manual triggering from the GitHub UI
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests google-generativeai html2image pillow
+          pip install requests google-genai html2image pillow
           
       # html2image requires Chrome to be installed. Ubuntu-latest comes with it, but just ensuring it's accessible.
       - name: Ensure Chrome is available

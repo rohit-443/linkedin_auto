@@ -3,12 +3,14 @@ import json
 import random
 import requests
 from datetime import datetime
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from html2image import Html2Image
 from PIL import Image, ImageChops
 import smtplib
 from email.message import EmailMessage
 import re
+import warnings
 
 # PATHS
 DIR_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -44,11 +46,10 @@ class DailyInterviewPoster:
         self.gmail_password = self.config.get("GOOGLE_APP_PASSWORD")
         
         # Configure Gemini
-        genai.configure(api_key=self.gemini_api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-flash')
+        self.client = genai.Client(api_key=self.gemini_api_key)
         
         self.hti = Html2Image()
-        self.hti.browser.flags = ['--no-sandbox', '--disable-gpu', '--hide-scrollbars']
+        self.hti.browser.flags = ['--no-sandbox', '--disable-gpu', '--hide-scrollbars', '--log-level=3', '--disable-dev-shm-usage']
 
     def select_topic(self):
         if not self.state["pending_topics"]:
@@ -105,9 +106,10 @@ class DailyInterviewPoster:
         """
         
         # Enforce JSON output using generation config
-        response = self.model.generate_content(
-            prompt,
-            generation_config=genai.GenerationConfig(
+        response = self.client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 temperature=0.7
             )
