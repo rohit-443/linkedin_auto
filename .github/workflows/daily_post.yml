@@ -6,6 +6,10 @@ on:
     - cron: '30 2,14 * * *'
   workflow_dispatch: # Allows manual triggering from the GitHub UI
 
+# Grant the workflow permission to push commits to the repo
+permissions:
+  contents: write
+
 jobs:
   post-questions:
     runs-on: ubuntu-latest
