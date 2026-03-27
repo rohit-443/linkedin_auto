@@ -1,6 +1,6 @@
 # AI Interview Prep Agent (Databricks & PySpark)
 
-This repository hosts an autonomous AI agent designed to automatically generate, format, and securely archive comprehensive Databricks and PySpark interview questions three times a day. 
+This repository hosts an autonomous AI agent designed to automatically generate, format, and securely archive comprehensive Databricks and PySpark interview questions two times a day. 
 
 ## What This Agent is Meant For
 Consistent, high-quality interview preparation. Rather than manually thinking of questions or searching the web, this agent:
@@ -32,7 +32,7 @@ The system is a fully automated, stateless Python pipeline (`daily_poster.py`) o
    To alert you of completion, Python's native `smtplib` authenticates with Gmail via an App Password and sends you an email containing the topic name and the direct Dropbox Shared Link to view your new flashcards instantly.
 
 6. **Continuous Deployment (GitHub Actions)**: 
-   After finishing, the `.github/workflows/daily_post.yml` workflow immediately commits the newly updated `state.json` and `history.jsonl` back into the `main` branch, ensuring the next run picks up exactly where it left off. This workflow runs entirely unattended **3 times a day**.
+   After finishing, the `.github/workflows/daily_post.yml` workflow immediately commits the newly updated `state.json` and `history.jsonl` back into the `main` branch, ensuring the next run picks up exactly where it left off. This workflow runs entirely unattended **2 times a day**.
 
 ## Deployment & Setup Instructions
 
