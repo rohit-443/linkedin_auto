@@ -22,6 +22,10 @@
         "Machine Learning with PySpark (MLlib, Feature Engineering)",
         "Advanced Databricks Architectures (Medallion Architecture)",
         "PySpark Troubleshooting and Debugging (OOM errors, Spark UI)",
+        "Handling Data Skewness in PySpark",
+        "Delta Lake Deletion Vectors",
+        "Data Staging Concepts",
+        "Databricks Auto Loader Deep Dive",
         "Real-world PySpark Scenario Questions"
     ]
 }

@@ -5,7 +5,10 @@ import requests
 from datetime import datetime
 import google.generativeai as genai
 from html2image import Html2Image
-from PIL import Image
+from PIL import Image, ImageChops
+import smtplib
+from email.message import EmailMessage
+import re
 
 # PATHS
 DIR_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -33,28 +36,19 @@ class DailyInterviewPoster:
         self.subject = load_json(SUBJECT_PATH)
         self.state = load_json(STATE_PATH)
         
-        self.access_token = self.config["access_token"]
-        self.gemini_api_key = self.config["gemini_api_key"]
+        self.gemini_api_key = self.config.get("gemini_api_key")
+        self.dropbox_refresh_token = self.config.get("DROPBOX_REFRESH_TOKEN")
+        self.dropbox_client_id = self.config.get("DROPBOX_CLIENT_ID")
+        self.dropbox_client_secret = self.config.get("DROPBOX_CLIENT_SECRET")
+        self.gmail_id = self.config.get("INTERVIEW_GMAIL_ID")
+        self.gmail_password = self.config.get("GOOGLE_APP_PASSWORD")
         
         # Configure Gemini
         genai.configure(api_key=self.gemini_api_key)
         self.model = genai.GenerativeModel('gemini-2.5-flash')
         
-        # Configure LinkedIn
-        self.headers = {
-            'Authorization': f'Bearer {self.access_token}',
-            'X-Restli-Protocol-Version': '2.0.0',
-            'LinkedIn-Version': '202401'
-        }
-        self.user_urn = self.get_user_urn()
         self.hti = Html2Image()
         self.hti.browser.flags = ['--no-sandbox', '--disable-gpu', '--hide-scrollbars']
-
-    def get_user_urn(self):
-        url = "https://api.linkedin.com/v2/userinfo"
-        res = requests.get(url, headers={'Authorization': f'Bearer {self.access_token}'})
-        res.raise_for_status()
-        return f"urn:li:person:{res.json()['sub']}"
 
     def select_topic(self):
         if not self.state["pending_topics"]:
@@ -92,7 +86,10 @@ class DailyInterviewPoster:
         
         Task: 
         1. Write an engaging LinkedIn post description (around 3-4 sentences) introducing the topic and encouraging followers to swipe through the 7 interview questions. Include relevant hashtags like #interviewprep #dataengineering.
-        2. Generate EXACTLY 7 interview questions related to the Primary Topic. For each question, provide a practical, highly concise solution (maximum 40 words for the solution).
+        2. Generate EXACTLY 7 interview questions related to the Primary Topic. For each question, provide a detailed, comprehensive, and practical solution. The solution can be as long as necessary to fully explain the concept.
+           - Limit the solution to a maximum of 5 bullet points if it is long.
+           - Provide short, clear programming examples heavily formatting them appropriately.
+           - Emphasize formatting cleanly.
         
         Return the result STRICTLY as a JSON object matching this exact schema:
         {{
@@ -102,6 +99,9 @@ class DailyInterviewPoster:
             ...
           ]
         }}
+        
+        IMPORTANT: Your output will be parsed natively via Python's json.loads(). 
+        Ensure all internal string contents, especially code blocks or newlines, are correctly escaped (e.g., use \\n for newlines, \\t for tabs, and double escape backslashes like \\\\d or \\\\ if writing code).
         """
         
         # Enforce JSON output using generation config
@@ -114,21 +114,44 @@ class DailyInterviewPoster:
         )
         
         try:
-            data = json.loads(response.text)
+            raw_text = response.text.strip()
+            if raw_text.startswith("```json"):
+                raw_text = raw_text.replace("```json", "", 1)
+            if raw_text.endswith("```"):
+                raw_text = raw_text[:-3]
+            raw_text = raw_text.strip()
+            
+            data = json.loads(raw_text, strict=False)
             if len(data["questions"]) > 7:
                 data["questions"] = data["questions"][:7]
             return data
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             print("Failed to decode JSON from Gemini. Raw response:")
             print(response.text)
             raise
 
     def generate_image(self, index, topic, question_obj):
-        q_text = question_obj['question']
-        s_text = question_obj['solution']
+        q_text = question_obj['question'].replace('"', '&quot;').replace("'", '&apos;')
+        s_text = question_obj['solution'].replace('"', '&quot;').replace("'", '&apos;')
+        
+        # Remove markdown bold heavily
+        q_text = q_text.replace('**', '')
+        s_text = s_text.replace('**', '')
+        
+        # Handle markdown blocks and parse to HTML pre tags
+        s_text = re.sub(
+            r'```[a-zA-Z]*\n?(.*?)```', 
+            r'<pre style="background-color:#E8E8E8; padding:20px; border-radius:8px; font-family: monospace; font-size: 28px; white-space: pre-wrap;"><code>\1</code></pre>', 
+            s_text, 
+            flags=re.DOTALL
+        )
+        
+        # Finally, safely replace newlines with BR
+        q_text = q_text.replace('\n', '<br>')
+        s_text = s_text.replace('\n', '<br>')
         
         # HTML Template matching user specification
-        html_content = f\"\"\"
+        html_content = f"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -136,12 +159,10 @@ class DailyInterviewPoster:
             body {{
                 margin: 0;
                 padding: 0;
-                width: 1080px;
-                height: 1080px;
+                width: 1500px;
                 background-color: #FFFFFF;
                 font-family: 'Segoe UI', Arial, sans-serif;
                 position: relative;
-                overflow: hidden;
             }}
             /* Yellow sectored circle (top-left) */
             .top-left-circle {{
@@ -180,7 +201,7 @@ class DailyInterviewPoster:
                 letter-spacing: 2px;
             }}
             .content {{
-                padding: 80px 100px;
+                padding: 80px 100px 20px 100px;
                 color: #000000;
             }}
             .question-box {{
@@ -200,12 +221,11 @@ class DailyInterviewPoster:
                 border-radius: 8px;
             }}
             .footer {{
-                position: absolute;
-                bottom: 40px;
-                right: 60px;
+                text-align: right;
                 font-size: 24px;
                 color: #777777;
                 font-style: italic;
+                padding: 0px 60px 40px 0;
             }}
         </style>
         </head>
@@ -222,66 +242,107 @@ class DailyInterviewPoster:
             <div class="footer">#{index}/7 Daily {self.subject['tool_name']} Prep</div>
         </body>
         </html>
-        \"\"\"
+        """
         
         output_file = f"question_{index}.png"
-        self.hti.screenshot(html_str=html_content, save_as=output_file, size=(1080, 1080))
+        self.hti.screenshot(html_str=html_content, save_as=output_file, size=(1500, 6000))
         
-        # Strip Alpha channel
         with Image.open(output_file) as img:
             rgb_img = img.convert('RGB')
+            bg = Image.new(rgb_img.mode, rgb_img.size, (255, 255, 255))
+            diff = ImageChops.difference(rgb_img, bg)
+            diff = ImageChops.add(diff, diff, 2.0, -100)
+            bbox = diff.getbbox()
+            if bbox:
+                rgb_img = rgb_img.crop((0, 0, rgb_img.width, bbox[3] + 40))
             rgb_img.save(output_file, 'PNG')
             
         return output_file
 
-    def register_and_upload(self, file_path):
-        url = "https://api.linkedin.com/v2/assets?action=registerUpload"
-        payload = {
-            "registerUploadRequest": {
-                "recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
-                "owner": self.user_urn,
-                "serviceRelationships": [{"relationshipType": "OWNER", "identifier": "urn:li:userGeneratedContent"}]
-            }
+    def get_dropbox_access_token(self):
+        url = "https://api.dropbox.com/oauth2/token"
+        data = {
+            "grant_type": "refresh_token",
+            "refresh_token": self.dropbox_refresh_token,
+            "client_id": self.dropbox_client_id,
+            "client_secret": self.dropbox_client_secret
         }
-        res = requests.post(url, headers=self.headers, json=payload)
+        res = requests.post(url, data=data)
         res.raise_for_status()
-        data = res.json()
-        upload_url = data['value']['uploadMechanism']['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']['uploadUrl']
-        asset_urn = data['value']['asset']
-        
-        # Upload binary
-        with open(file_path, 'rb') as f:
-            image_data = f.read()
-            
-        upload_headers = {
-            'Authorization': f'Bearer {self.access_token}',
-            'Content-Type': 'image/png'
-        }
-        upload_res = requests.post(upload_url, data=image_data, headers=upload_headers)
-        upload_res.raise_for_status()
-        
-        return asset_urn
+        return res.json()["access_token"]
 
-    def post_to_linkedin(self, post_description, asset_urns):
-        url = "https://api.linkedin.com/v2/ugcPosts"
-        media_items = [{"status": "READY", "media": urn} for urn in asset_urns]
-        
-        payload = {
-            "author": self.user_urn,
-            "lifecycleState": "PUBLISHED",
-            "specificContent": {
-                "com.linkedin.ugc.ShareContent": {
-                    "shareCommentary": {"text": post_description},
-                    "shareMediaCategory": "IMAGE",
-                    "media": media_items
-                }
-            },
-            "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"}
+    def upload_to_dropbox(self, file_path, target_path):
+        access_token = self.get_dropbox_access_token()
+        url = "https://content.dropboxapi.com/2/files/upload"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Dropbox-API-Arg": json.dumps({
+                "path": target_path,
+                "mode": "add",
+                "autorename": True,
+                "mute": False,
+                "strict_conflict": False
+            }),
+            "Content-Type": "application/octet-stream"
         }
-        
-        res = requests.post(url, headers=self.headers, json=payload)
+        with open(file_path, "rb") as f:
+            data = f.read()
+        res = requests.post(url, headers=headers, data=data)
         res.raise_for_status()
         return res.json()
+
+    def get_dropbox_shared_link(self, path):
+        access_token = self.get_dropbox_access_token()
+        url = "https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "path": path,
+            "settings": {
+                "requested_visibility": "public"
+            }
+        }
+        res = requests.post(url, headers=headers, json=data)
+        if res.status_code == 200:
+            return res.json().get("url")
+        elif res.status_code == 409 and "shared_link_already_exists" in res.text:
+            url_list = "https://api.dropboxapi.com/2/sharing/list_shared_links"
+            data_list = {"path": path}
+            res_list = requests.post(url_list, headers=headers, json=data_list)
+            if res_list.status_code == 200:
+                links = res_list.json().get("links", [])
+                if links:
+                    return links[0].get("url")
+        return f"Could not generate link for {path}"
+
+    def send_success_email(self, topic, shared_link):
+        if not self.gmail_id or not self.gmail_password:
+            print("Email credentials missing. Skipping email alert.")
+            return
+
+        subject = f"✅ Success: Daily Interview Poster - {topic}"
+        body = f"""
+The daily interview questions have been generated and uploaded to Dropbox successfully.
+
+Topic: {topic}
+Dropbox Folder Link: {shared_link}
+        """
+
+        msg = EmailMessage()
+        msg.set_content(body)
+        msg['Subject'] = subject
+        msg['From'] = self.gmail_id
+        msg['To'] = self.gmail_id  # Sending alert to self
+
+        try:
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+                server.login(self.gmail_id, self.gmail_password)
+                server.send_message(msg)
+            print("Successfully sent success email alert.")
+        except Exception as e:
+            print(f"Failed to send email alert: {e}")
 
     def run(self):
         # 1. State
@@ -293,17 +354,17 @@ class DailyInterviewPoster:
         questions = generated_data["questions"]
         
         # 3. Images + Upload
-        asset_urns = []
+        date_folder = datetime.now().strftime('%Y%m%d_%H%M%S')
+        dropbox_paths = []
         for i, q in enumerate(questions):
             print(f"Generating image {i+1}/7...")
             img_path = self.generate_image(i+1, current_topic, q)
-            print(f"Uploading image {i+1}/7...")
-            urn = self.register_and_upload(img_path)
-            asset_urns.append(urn)
+            print(f"Uploading image {i+1}/7 to Dropbox...")
+            target_path = f"/interview_questions/databricks_pyspark/{date_folder}/question_{i+1}.png"
+            self.upload_to_dropbox(img_path, target_path)
+            dropbox_paths.append(target_path)
         
-        # 4. Post
-        print("Publishing to LinkedIn feed...")
-        post_response = self.post_to_linkedin(post_description, asset_urns)
+        print("Images securely stored in Dropbox.")
         
         # 5. Update State
         self.state["pending_topics"].pop(0)
@@ -326,9 +387,28 @@ class DailyInterviewPoster:
             "combined_topic": combined_topic,
             "post_description": post_description,
             "questions_posted": questions,
-            "linkedin_urn": post_response.get("id") # The X-RestLi-Id or URN from response
+            "dropbox_folder": date_folder
         }
         append_history(history_entry)
+        
+        # 6.5 Append Proof of Concept Plain Text Log
+        poc_path = os.path.join(DIR_PATH, "daily_responses.txt")
+        with open(poc_path, "a", encoding="utf-8") as f:
+            f.write(f"--- Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ---\n")
+            f.write(f"Topic: {current_topic}\n")
+            clean_desc = post_description.replace('**', '')
+            f.write(f"Description: {clean_desc}\n\n")
+            for i, q in enumerate(questions):
+                clean_q = q["question"].replace('**', '')
+                clean_s = q["solution"].replace('**', '')
+                f.write(f"Q{i+1}: {clean_q}\n")
+                f.write(f"Solution: {clean_s}\n\n")
+            f.write("\n")
+        
+        # 7. Send Email Alert
+        folder_path = f"/interview_questions/databricks_pyspark/{date_folder}"
+        shared_link = self.get_dropbox_shared_link(folder_path)
+        self.send_success_email(current_topic, shared_link)
         
         print("✅ Daily run complete!")
 

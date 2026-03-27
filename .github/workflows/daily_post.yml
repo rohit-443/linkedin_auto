@@ -1,9 +1,9 @@
 name: Daily LinkedIn Interview Questions
 
 on:
-  # schedule:
-  #   # Runs at 12:00 UTC (roughly 5:30 PM IST) every day Monday-Friday
-  #   - cron: '0 12 * * 1-5'
+  schedule:
+    # Runs at 2:30 AM, 10:30 AM, and 6:30 PM UTC
+    - cron: '30 2,10,18 * * *'
   workflow_dispatch: # Allows manual triggering from the GitHub UI
 
 jobs:
@@ -29,12 +29,20 @@ jobs:
           
       - name: Create Credentials JSON
         env:
-          LINKEDIN_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           GEMINI_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+          DROPBOX_CLIENT_ID: ${{ secrets.DROPBOX_CLIENT_ID }}
+          DROPBOX_CLIENT_SECRET: ${{ secrets.DROPBOX_CLIENT_SECRET }}
+          GMAIL_ID: ${{ secrets.INTERVIEW_GMAIL_ID }}
+          GMAIL_PASSWORD: ${{ secrets.GOOGLE_APP_PASSWORD }}
         run: |
           echo '{
-            "access_token": "'"$LINKEDIN_TOKEN"'",
-            "gemini_api_key": "'"$GEMINI_KEY"'"
+            "gemini_api_key": "'"$GEMINI_KEY"'",
+            "DROPBOX_REFRESH_TOKEN": "'"$DROPBOX_REFRESH_TOKEN"'",
+            "DROPBOX_CLIENT_ID": "'"$DROPBOX_CLIENT_ID"'",
+            "DROPBOX_CLIENT_SECRET": "'"$DROPBOX_CLIENT_SECRET"'",
+            "INTERVIEW_GMAIL_ID": "'"$GMAIL_ID"'",
+            "GOOGLE_APP_PASSWORD": "'"$GMAIL_PASSWORD"'"
           }' > linked_in_token.json
           
       - name: Run Daily Poster Script
@@ -44,6 +52,6 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add state.json history.jsonl
+          git add state.json history.jsonl daily_responses.txt
           git commit -m "chore: save daily bot state updates [skip ci]" || echo "No state changes to commit"
           git push
