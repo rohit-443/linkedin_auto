@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "Introduction to Apache Spark & PySpark (Architecture, RDD vs DataFrame)",
     "PySpark RDD Programming Basics (Transformations vs Actions, Lazy Evaluation)",
     "PySpark DataFrame Basics (Schemas, Select, Filter, WithColumn)",
     "PySpark Data Manipulation (Joins, Aggregations, GroupBy, Window Functions)",
@@ -25,6 +24,16 @@
     "Databricks Auto Loader Deep Dive",
     "Real-world PySpark Scenario Questions"
   ],
-  "covered_topics": [],
-  "recent_questions": []
+  "covered_topics": [
+    "Introduction to Apache Spark & PySpark (Architecture, RDD vs DataFrame)"
+  ],
+  "recent_questions": [
+    "What is Apache Spark, and why is it popular for big data processing?",
+    "Describe the core architecture of Apache Spark.",
+    "Explain the concept of an RDD in Spark. What are its key characteristics and limitations?",
+    "What is a Spark DataFrame, and how does it differ from an RDD? Why should one prefer DataFrames over RDDs?",
+    "Discuss the advantages of using DataFrames/Datasets over RDDs in PySpark, specifically mentioning Catalyst Optimizer and Tungsten.",
+    "How does lazy evaluation work in Spark, and why is it important for performance? Provide an example.",
+    "Differentiate between Spark transformations and actions, giving examples of each."
+  ]
 }
