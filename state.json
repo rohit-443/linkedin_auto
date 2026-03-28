@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "PySpark RDD Programming Basics (Transformations vs Actions, Lazy Evaluation)",
     "PySpark DataFrame Basics (Schemas, Select, Filter, WithColumn)",
     "PySpark Data Manipulation (Joins, Aggregations, GroupBy, Window Functions)",
     "Reading & Writing Data in PySpark (CSV, JSON, Parquet, Avro, JDBC)",
@@ -25,7 +24,8 @@
     "Real-world PySpark Scenario Questions"
   ],
   "covered_topics": [
-    "Introduction to Apache Spark & PySpark (Architecture, RDD vs DataFrame)"
+    "Introduction to Apache Spark & PySpark (Architecture, RDD vs DataFrame)",
+    "PySpark RDD Programming Basics (Transformations vs Actions, Lazy Evaluation)"
   ],
   "recent_questions": [
     "What is Apache Spark, and why is it popular for big data processing?",
@@ -34,6 +34,13 @@
     "What is a Spark DataFrame, and how does it differ from an RDD? Why should one prefer DataFrames over RDDs?",
     "Discuss the advantages of using DataFrames/Datasets over RDDs in PySpark, specifically mentioning Catalyst Optimizer and Tungsten.",
     "How does lazy evaluation work in Spark, and why is it important for performance? Provide an example.",
-    "Differentiate between Spark transformations and actions, giving examples of each."
+    "Differentiate between Spark transformations and actions, giving examples of each.",
+    "When you apply a series of transformations on an RDD in PySpark, what is the immediate outcome before any action is called? Illustrate with a simple `map` example.",
+    "Describe the key characteristics and implications of an RDD action. How does calling an action like `collect()` or `count()` differ fundamentally from a transformation in terms of execution flow?",
+    "Consider a scenario where you have a very large dataset and apply multiple filtering and mapping operations on an RDD. Explain how Spark's lazy evaluation strategy optimizes resource usage and execution time in this context. Provide a code snippet demonstrating a chain of lazy operations.",
+    "How does Spark's RDD lineage graph contribute to its fault tolerance and lazy evaluation model? Describe what the lineage graph represents and its role in recomputing lost partitions.",
+    "Explain the concept of immutability in the context of Spark RDDs. Why is immutability a crucial design principle for RDDs, especially in a distributed computing environment?",
+    "Differentiate between narrow and wide transformations in PySpark RDDs, providing an example for each. How does this distinction impact Spark's execution plan and fault tolerance?",
+    "While DataFrames are generally preferred, describe a specific use case or scenario where directly working with RDDs in PySpark might still be advantageous or necessary, especially when dealing with highly unstructured data or custom serialization. How do RDD transformations and actions facilitate such a use case?"
   ]
 }
