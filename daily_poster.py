@@ -166,6 +166,15 @@ class DailyInterviewPoster:
                 font-family: 'Segoe UI', Arial, sans-serif;
                 position: relative;
             }}
+            .main-wrapper {{
+                position: relative;
+                overflow: hidden;
+                min-height: 100px;
+            }}
+            .content-layer {{
+                position: relative;
+                z-index: 1;
+            }}
             /* Yellow sectored circle (top-left) */
             .top-left-circle {{
                 position: absolute;
@@ -175,6 +184,7 @@ class DailyInterviewPoster:
                 height: 250px;
                 background-color: #FFD700;
                 border-bottom-right-radius: 250px;
+                z-index: 1;
             }}
             /* Red sectored circle (top-right) */
             .top-right-circle {{
@@ -185,6 +195,7 @@ class DailyInterviewPoster:
                 height: 250px;
                 background-color: #FF4500;
                 border-bottom-left-radius: 250px;
+                z-index: 1;
             }}
             /* Light purple horizontal strip */
             .ribbon {{
@@ -194,6 +205,8 @@ class DailyInterviewPoster:
                 box-sizing: border-box;
                 text-align: center;
                 margin-top: 100px;
+                position: relative;
+                z-index: 1;
             }}
             .ribbon-text {{
                 font-size: 36px;
@@ -205,6 +218,8 @@ class DailyInterviewPoster:
             .content {{
                 padding: 80px 100px 20px 100px;
                 color: #000000;
+                position: relative;
+                z-index: 1;
             }}
             .question-box {{
                 font-size: 42px;
@@ -222,26 +237,57 @@ class DailyInterviewPoster:
                 border-left: 8px solid #FFD700;
                 border-radius: 8px;
             }}
+            .footer-container {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0px 60px 40px 60px;
+                position: relative;
+                z-index: 1;
+            }}
+            .brand-watermark {{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                font-size: 32px;
+                font-weight: bold;
+                color: #0A66C2;
+            }}
+            .brand-watermark svg {{
+                width: 45px;
+                height: 45px;
+                fill: #0A66C2;
+            }}
             .footer {{
                 text-align: right;
                 font-size: 24px;
                 color: #777777;
                 font-style: italic;
-                padding: 0px 60px 40px 0;
             }}
         </style>
         </head>
         <body>
-            <div class="top-left-circle"></div>
-            <div class="top-right-circle"></div>
-            <div class="ribbon">
-                <div class="ribbon-text">{topic}</div>
+            <div class="main-wrapper">
+
+                <div class="top-left-circle"></div>
+                <div class="top-right-circle"></div>
+                <div class="ribbon">
+                    <div class="ribbon-text">{topic}</div>
+                </div>
+                <div class="content">
+                    <div class="question-box">Q: {q_text}</div>
+                    <div class="solution-box"><strong>Solution:</strong><br>{s_text}</div>
+                </div>
+                <div class="footer-container">
+                    <div class="brand-watermark">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                        Rohit Jonnadula
+                    </div>
+                    <div class="footer">#{index}/7 Daily {self.subject['tool_name']} Prep</div>
+                </div>
             </div>
-            <div class="content">
-                <div class="question-box">Q: {q_text}</div>
-                <div class="solution-box"><strong>Solution:</strong><br>{s_text}</div>
-            </div>
-            <div class="footer">#{index}/7 Daily {self.subject['tool_name']} Prep</div>
         </body>
         </html>
         """
