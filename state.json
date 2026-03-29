@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "PySpark Data Manipulation (Joins, Aggregations, GroupBy, Window Functions)",
     "Reading & Writing Data in PySpark (CSV, JSON, Parquet, Avro, JDBC)",
     "Spark SQL & User Defined Functions (UDFs, pandas UDFs)",
     "Spark Optimization Techniques (Partitioning, Bucketing, Broadcast Joins)",
@@ -25,7 +24,8 @@
   "covered_topics": [
     "Introduction to Apache Spark & PySpark (Architecture, RDD vs DataFrame)",
     "PySpark RDD Programming Basics (Transformations vs Actions, Lazy Evaluation)",
-    "PySpark DataFrame Basics (Schemas, Select, Filter, WithColumn)"
+    "PySpark DataFrame Basics (Schemas, Select, Filter, WithColumn)",
+    "PySpark Data Manipulation (Joins, Aggregations, GroupBy, Window Functions)"
   ],
   "recent_questions": [
     "What is Apache Spark, and why is it popular for big data processing?",
@@ -48,6 +48,13 @@
     "Explain the purpose and common use cases of the `withColumn()` transformation in PySpark. Provide examples for adding a new column, modifying an existing one, and casting data types.",
     "Discuss the mapping between native Python types and PySpark SQL data types. Why is it crucial to understand and correctly specify data types when working with DataFrames, especially for performance and data integrity?",
     "Explain the concept of immutability as it applies to PySpark DataFrames. When you apply a transformation like `withColumn()`, what actually happens to the original DataFrame, and how does this design principle contribute to Spark's reliability?",
-    "How does Spark's Catalyst Optimizer benefit DataFrame operations like `select` and `filter`? Provide a conceptual overview and an example of an optimization it might perform."
+    "How does Spark's Catalyst Optimizer benefit DataFrame operations like `select` and `filter`? Provide a conceptual overview and an example of an optimization it might perform.",
+    "Explain the different types of joins available in PySpark DataFrames and provide a practical example demonstrating an `inner` and a `left_outer` join.",
+    "How do you perform aggregations on a PySpark DataFrame, both globally and per group? Illustrate with examples using `agg` and `groupBy` to calculate total sales and average quantity per product category.",
+    "Describe the concept of Window Functions in PySpark. Provide an example of how to use a window function to calculate a running total or a moving average within partitions.",
+    "When performing joins in PySpark, what are some common performance considerations and strategies for optimizing large-scale joins, especially regarding data skew? Discuss broadcast joins.",
+    "Differentiate between `groupBy().agg()` and `rollup()` or `cube()` operations in PySpark. When would you choose `rollup()` or `cube()` over a standard `groupBy()`?",
+    "Explain the difference between `row_number()`, `rank()`, and `dense_rank()` window functions in PySpark. Provide a scenario where each would be most appropriate.",
+    "You have two large PySpark DataFrames, `transactions` (customer_id, transaction_amount, transaction_date) and `customers` (customer_id, region, registration_date). Design a PySpark job to find the top 5 customers by total transaction amount in each `region` for transactions made in the last year. Explain the steps and the PySpark functions you would use."
   ]
 }

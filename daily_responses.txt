@@ -783,3 +783,320 @@ Solution: Spark's Catalyst Optimizer is the brain behind DataFrames' efficiency.
     The optimized physical plan would effectively look like: `Filter(age > 28) -> Project(name, age, city)`. This means Spark only filters the necessary data and only projects the necessary columns, significantly reducing the amount of data processed and transferred.
 
 
+--- Date: 2026-03-29 04:59:51 ---
+Topic: PySpark Data Manipulation (Joins, Aggregations, GroupBy, Window Functions)
+Description: Hey #DataEngineers and #SparkDevelopers! Ready to master PySpark data manipulation? This week, we're diving deep into essential operations like joins, aggregations, GroupBy, and powerful window functions. Swipe through these 7 challenging interview questions to test your knowledge and elevate your PySpark skills! #interviewprep #dataengineering #databricks #pyspark
+
+Q1: Explain the different types of joins available in PySpark DataFrames and provide a practical example demonstrating an `inner` and a `left_outer` join.
+Solution: PySpark DataFrames support various SQL-standard join types to combine two DataFrames based on common column(s).
+
+*   Inner Join: Returns only the rows where the join condition is met in both DataFrames. It's the most common type.
+*   Outer Join (Full Outer Join): Returns all rows from both DataFrames, filling `null` for columns where no match is found in the other DataFrame.
+*   Left Outer Join (Left Join): Returns all rows from the left DataFrame and the matched rows from the right DataFrame. If no match, `null` is filled for right DataFrame columns.
+*   Right Outer Join (Right Join): Returns all rows from the right DataFrame and the matched rows from the left DataFrame. If no match, `null` is filled for left DataFrame columns.
+*   Left Semi Join: Returns rows from the left DataFrame that have a match in the right DataFrame. It's similar to `INNER JOIN` but only returns columns from the left DataFrame.
+*   Left Anti Join: Returns rows from the left DataFrame that do *not* have a match in the right DataFrame. Useful for finding records without corresponding entries.
+
+Here's an example:
+```python
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+
+spark = SparkSession.builder.appName("JoinExample").getOrCreate()
+
+# Sample DataFrames
+df_employees = spark.createDataFrame([
+    (1, "Alice", 101),
+    (2, "Bob", 102),
+    (3, "Charlie", 101),
+    (4, "David", None) # David has no department
+], ["emp_id", "name", "dept_id"])
+
+df_departments = spark.createDataFrame([
+    (101, "HR"),
+    (102, "Engineering"),
+    (103, "Sales") # Sales has no employees yet
+], ["dept_id", "dept_name"])
+
+print("\n--- Inner Join ---")
+df_employees.join(df_departments, "dept_id", "inner").show()
+# Expected: Alice (HR), Bob (Engineering), Charlie (HR)
+
+print("\n--- Left Outer Join ---")
+df_employees.join(df_departments, "dept_id", "left_outer").show()
+# Expected: Alice (HR), Bob (Engineering), Charlie (HR), David (null)
+
+spark.stop()
+```
+
+Q2: How do you perform aggregations on a PySpark DataFrame, both globally and per group? Illustrate with examples using `agg` and `groupBy` to calculate total sales and average quantity per product category.
+Solution: PySpark DataFrames provide powerful methods for performing aggregations, either across the entire DataFrame (globally) or within specific groups defined by one or more columns.
+
+*   Global Aggregation: To aggregate across the entire DataFrame, you can directly use the `agg()` function on the DataFrame, often combined with aggregate functions from `pyspark.sql.functions`.
+*   Grouped Aggregation: For aggregations per group, you first use `groupBy()` on the column(s) you want to group by, and then apply aggregate functions. The `agg()` method is highly flexible, allowing multiple aggregations in a single call, and also supports renaming output columns.
+
+Here's an example:
+```python
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import sum, avg, count, col
+
+spark = SparkSession.builder.appName("AggregationExample").getOrCreate()
+
+data = [
+    ("Laptop", "Electronics", 1200, 2),
+    ("Mouse", "Electronics", 25, 5),
+    ("Keyboard", "Electronics", 75, 3),
+    ("Desk", "Furniture", 300, 1),
+    ("Chair", "Furniture", 150, 4),
+    ("Monitor", "Electronics", 250, 2)
+]
+
+df_sales = spark.createDataFrame(data, ["product", "category", "price", "quantity"])
+df_sales = df_sales.withColumn("total_sale", col("price") * col("quantity"))
+
+print("Original DataFrame:")
+df_sales.show()
+
+# --- Global Aggregation ---
+print("\nGlobal Aggregation (Total Sales, Total Quantity, Total Products):")
+df_sales.agg(
+    sum("total_sale").alias("overall_total_sales"),
+    sum("quantity").alias("overall_total_quantity"),
+    count("product").alias("total_products_sold")
+).show()
+
+# --- Grouped Aggregation by 'category' ---
+print("\nGrouped Aggregation by Category (Total Sales, Average Quantity):")
+df_sales.groupBy("category").agg(
+    sum("total_sale").alias("category_total_sales"),
+    avg("quantity").alias("category_avg_quantity")
+).orderBy("category").show()
+
+spark.stop()
+```
+
+Q3: Describe the concept of Window Functions in PySpark. Provide an example of how to use a window function to calculate a running total or a moving average within partitions.
+Solution: Window functions in PySpark compute a result for each row based on a 'window' of rows related to the current row. Unlike `groupBy()` which collapses rows into a single aggregated result, window functions return a value for *every* input row, making them ideal for analytical tasks like ranking, calculating running totals, or moving averages.
+
+*   Key Components: A window function requires defining a `WindowSpec` using `Window.partitionBy()`, `Window.orderBy()`, and optionally `Window.rowsBetween()` or `Window.rangeBetween()`.
+    *   `partitionBy()`: Divides the DataFrame into logical groups (partitions) where the window function will operate independently.
+    *   `orderBy()`: Sorts the rows within each partition, which is crucial for functions like running totals or ranks.
+    *   `rowsBetween()`/`rangeBetween()`: Defines the sliding window frame relative to the current row (e.g., `(Window.unboundedPreceding, Window.currentRow)` for a running total, or `(-N, N)` for a moving average).
+
+Here's an example calculating a running total of sales and a 2-period moving average of quantity within each product category:
+```python
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import sum, avg, col
+from pyspark.sql.window import Window
+
+spark = SparkSession.builder.appName("WindowFunctionExample").getOrCreate()
+
+data = [
+    ("A", "X", 10, "2023-01-01"),
+    ("A", "X", 15, "2023-01-02"),
+    ("A", "Y", 20, "2023-01-01"),
+    ("A", "X", 5, "2023-01-03"),
+    ("B", "X", 12, "2023-01-01"),
+    ("B", "Y", 8, "2023-01-02"),
+    ("B", "Y", 18, "2023-01-03")
+]
+
+df = spark.createDataFrame(data, ["region", "product_category", "sales", "sale_date"])
+df = df.withColumn("sale_date", col("sale_date").cast("date"))
+df.show()
+
+# Define a window specification:
+# Partition by region and product_category, order by sale_date
+window_spec = Window.partitionBy("region", "product_category").orderBy("sale_date")
+
+# Running total of sales within each partition
+df_with_running_total = df.withColumn(
+    "running_total_sales",
+    sum("sales").over(window_spec.rowsBetween(Window.unboundedPreceding, Window.currentRow))
+)
+
+# Moving average of sales (2 periods preceding + current row)
+window_spec_moving_avg = Window.partitionBy("region", "product_category").orderBy("sale_date")
+
+df_with_moving_avg = df_with_running_total.withColumn(
+    "moving_avg_sales_3day",
+    avg("sales").over(window_spec_moving_avg.rowsBetween(-2, Window.currentRow))
+)
+
+print("\nDataFrame with Running Total and Moving Average:")
+df_with_moving_avg.orderBy("region", "product_category", "sale_date").show()
+
+spark.stop()
+```
+
+Q4: When performing joins in PySpark, what are some common performance considerations and strategies for optimizing large-scale joins, especially regarding data skew? Discuss broadcast joins.
+Solution: Optimizing large-scale joins in PySpark is crucial for performance, especially when dealing with data skew. Data skew occurs when a few keys have significantly more data than others, leading to an uneven distribution of work and potential bottlenecks in shuffle stages.
+
+*   Broadcast Join (Map-Side Join):
+    *   Concept: If one DataFrame is significantly smaller (typically up to a few hundred MBs, configurable via `spark.sql.autoBroadcastJoinThreshold`), Spark can broadcast it to all worker nodes. This avoids a shuffle for the larger DataFrame, as each worker can perform the join locally with its partitions and the broadcasted small DataFrame.
+    *   Benefit: Eliminates data shuffle for the larger table, reducing network I/O and potential data skew issues.
+    *   Usage: Spark can automatically decide to broadcast if `spark.sql.autoBroadcastJoinThreshold` is set. You can also explicitly hint using `broadcast(df_small)` from `pyspark.sql.functions`.
+    *   Example: `df_large.join(broadcast(df_small), 'key')`
+
+*   Salting (for skewed joins):
+    *   Concept: If a large DataFrame is skewed, you can 'salt' the join key. This involves adding a random suffix to the skewed join key in both DataFrames, effectively creating more distinct keys and distributing the skewed data across more partitions.
+    *   Process: Add a random number (e.g., 0-N) to the join key of the smaller DataFrame. For the larger, skewed DataFrame, duplicate the rows corresponding to the skewed key N times, each with a different salt. This is complex and should be a last resort.
+
+*   Re-partitioning: Before a join, ensure that the DataFrames are partitioned appropriately. If joining on `colA`, `df.repartition(num_partitions, 'colA')` can ensure data with the same `colA` values are on the same partition, reducing data transfer during the shuffle.
+
+*   Filtering Early: Apply filters on both DataFrames *before* joining to reduce the amount of data that needs to be shuffled and processed. Smaller DataFrames mean faster joins.
+
+*   Schema and Data Types: Ensure join keys have consistent data types. Mismatched or inefficient data types can hinder Catalyst Optimizer's ability to create an optimal plan.
+
+Q5: Differentiate between `groupBy().agg()` and `rollup()` or `cube()` operations in PySpark. When would you choose `rollup()` or `cube()` over a standard `groupBy()`?
+Solution: While `groupBy().agg()` performs standard aggregations based on specified columns, `rollup()` and `cube()` provide more comprehensive summary aggregations, generating subtotals and grand totals across different combinations of grouping columns.
+
+*   `groupBy().agg()`: This is the most common aggregation method. It groups rows based on one or more specified columns and then applies aggregate functions (e.g., `sum`, `count`, `avg`) to the grouped data. It produces a single result row for each unique combination of grouping keys.
+    *   Use Case: When you need a specific level of aggregation, like total sales per `(category, product)`.
+    *   Example: `df.groupBy("category", "product").agg(sum("sales").alias("total_sales"))`
+
+*   `rollup()`: `rollup()` generates aggregations for all possible grouping combinations (subtotals) based on a hierarchical order of columns, plus a grand total. If you `rollup(A, B, C)`, it will produce aggregates for `(A, B, C)`, `(A, B)`, `(A)`, and `()`, representing the grand total. The order of columns matters.
+    *   Use Case: When you need hierarchical summaries, such as total sales by `(year, month, day)`, then by `(year, month)`, then by `(year)`, and finally a grand total. It's useful for reporting dashboards.
+    *   Example: `df.rollup("category", "product").agg(sum("sales").alias("total_sales"))`
+
+*   `cube()`: `cube()` generates aggregations for *all possible combinations* of the specified grouping columns, including a grand total. If you `cube(A, B, C)`, it will produce aggregates for `(A, B, C)`, `(A, B)`, `(A, C)`, `(B, C)`, `(A)`, `(B)`, `(C)`, and `()`. The order of columns does not matter.
+    *   Use Case: When you need to analyze data from every possible dimension combination, useful for multi-dimensional analysis or OLAP cubes.
+    *   Example: `df.cube("category", "product").agg(sum("sales").alias("total_sales"))`
+
+When to choose `rollup()` or `cube()` over `groupBy()`:
+Choose `rollup()` or `cube()` when you need to generate multiple levels of aggregation (subtotals and grand totals) in a single query, rather than writing separate `groupBy()` queries and unioning them. `rollup()` is for hierarchical summaries, while `cube()` is for all-dimensions summaries. They simplify complex reporting requirements by generating a more comprehensive dataset of aggregates.
+
+Q6: Explain the difference between `row_number()`, `rank()`, and `dense_rank()` window functions in PySpark. Provide a scenario where each would be most appropriate.
+Solution: These three window functions are used for assigning sequential integer ranks to rows within a partition, but they differ in how they handle ties.
+
+*   `row_number()`: Assigns a unique, sequential integer to each row within its partition, starting from 1. If there are ties (rows with identical values in the ordering column(s)), `row_number()` assigns arbitrary but distinct ranks to them.
+    *   Scenario: Selecting the *first* (or last) N records within a group, like finding the top 3 most recent transactions for each customer, where the exact order among tied transactions doesn't matter, but you need a distinct identifier.
+    *   Example: `row_number().over(Window.partitionBy("customer_id").orderBy("transaction_date"))`
+
+*   `rank()`: Assigns a rank to each row within its partition. If there are ties, all tied rows receive the same rank, and the next rank in the sequence is skipped. For example, if two rows are tied for rank 2, the next rank will be 4.
+    *   Scenario: Identifying items based on their rank where gaps in ranking are acceptable and ties should share the same rank. E.g., ranking products by sales, where products with identical sales figures get the same rank, and the next product gets a rank reflecting the count of preceding distinct ranks plus tied ranks.
+    *   Example: `rank().over(Window.partitionBy("category").orderBy(col("sales").desc()))`
+
+*   `dense_rank()`: Similar to `rank()`, but when there are ties, all tied rows receive the same rank, and the next rank in the sequence is *not* skipped. For example, if two rows are tied for rank 2, the next rank will be 3.
+    *   Scenario: Similar to `rank()`, but when you want a continuous sequence of ranks without gaps. E.g., ranking students by score, where tied scores get the same rank, and the next distinct score gets the next sequential rank (e.g., 1, 1, 2, 3, 3, 4).
+    *   Example: `dense_rank().over(Window.partitionBy("department").orderBy(col("salary").desc()))`
+
+Here's a combined example:
+```python
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, row_number, rank, dense_rank
+from pyspark.sql.window import Window
+
+spark = SparkSession.builder.appName("RankingFunctions").getOrCreate()
+
+data = [
+    ("A", 100),
+    ("A", 200),
+    ("A", 200),
+    ("A", 300),
+    ("B", 50),
+    ("B", 50),
+    ("B", 70)
+]
+
+df = spark.createDataFrame(data, ["group", "value"])
+df.show()
+
+window_spec = Window.partitionBy("group").orderBy(col("value").desc())
+
+df_ranked = df.withColumn("row_number", row_number().over(window_spec)) \
+              .withColumn("rank", rank().over(window_spec)) \
+              .withColumn("dense_rank", dense_rank().over(window_spec))
+
+print("\nDataFrame with Ranking Functions:")
+df_ranked.orderBy("group", col("value").desc()).show()
+
+spark.stop()
+```
+
+Q7: You have two large PySpark DataFrames, `transactions` (customer_id, transaction_amount, transaction_date) and `customers` (customer_id, region, registration_date). Design a PySpark job to find the top 5 customers by total transaction amount in each `region` for transactions made in the last year. Explain the steps and the PySpark functions you would use.
+Solution: This task involves several PySpark data manipulation techniques: filtering, joining, grouping, aggregating, and using window functions for ranking. The goal is to identify high-value customers per region based on recent activity.
+
+*   Step 1: Filter Transactions for the Last Year: First, filter the `transactions` DataFrame to include only records from the last 12 months. This reduces the data size early, which is a good practice for performance.
+    ```python
+    from pyspark.sql import SparkSession
+    from pyspark.sql.functions import col, sum, datediff, current_date, year, month, dayofmonth, to_date, lit
+    from pyspark.sql.window import Window
+
+    spark = SparkSession.builder.appName("TopCustomersPerRegion").getOrCreate()
+
+    # Sample DataFrames (in a real scenario, these would be read from Delta/Parquet)
+    transactions_data = [
+        (1, 100, "2023-05-15"), (1, 200, "2024-03-01"), (1, 50, "2024-04-20"),
+        (2, 150, "2023-08-01"), (2, 300, "2024-01-10"),
+        (3, 500, "2023-01-01"), (3, 50, "2024-04-25"),
+        (4, 75, "2024-02-14"),
+        (5, 120, "2023-11-01"), (5, 80, "2024-03-15"), (5, 180, "2024-04-01"),
+        (6, 10, "2023-06-01"), # Old transaction
+        (7, 600, "2024-01-05"), # Another high value customer
+        (8, 550, "2024-02-10"), # Another high value customer
+        (9, 450, "2024-03-20")  # Another high value customer
+    ]
+    customers_data = [
+        (1, "North"), (2, "South"), (3, "North"), (4, "East"), (5, "South"),
+        (6, "East"), (7, "North"), (8, "South"), (9, "East")
+    ]
+
+    df_transactions = spark.createDataFrame(transactions_data, ["customer_id", "transaction_amount", "transaction_date"])
+    df_customers = spark.createDataFrame(customers_data, ["customer_id", "region"])
+
+    # Convert date strings to actual dates
+    df_transactions = df_transactions.withColumn("transaction_date", col("transaction_date").cast("date"))
+
+    # Filter transactions for the last year (e.g., assuming current_date is '2024-05-01')
+    # For demonstration, let's fix the 'current_date' to a specific value to make output deterministic
+    today = to_date(lit("2024-05-01"))
+    one_year_ago = to_date(lit("2023-05-01"))
+
+    recent_transactions = df_transactions.filter(
+        (col("transaction_date") >= one_year_ago) & (col("transaction_date") <= today)
+    )
+    print("\nRecent Transactions (Last Year):")
+    recent_transactions.show()
+    ```
+
+*   Step 2: Join with Customer Data: Join the filtered `recent_transactions` with `df_customers` on `customer_id` to bring in the `region` information.
+    ```python
+    # Join with customers to get region information
+    joined_df = recent_transactions.join(df_customers, "customer_id", "inner")
+    print("\nJoined DataFrame:")
+    joined_df.show()
+    ```
+
+*   Step 3: Calculate Total Transaction Amount per Customer and Region: Group the `joined_df` by `customer_id` and `region`, then sum the `transaction_amount` to get each customer's total spending in the last year.
+    ```python
+    customer_region_total_sales = joined_df.groupBy("customer_id", "region").agg(
+        sum("transaction_amount").alias("total_transaction_amount_last_year")
+    )
+    print("\nCustomer Total Sales per Region:")
+    customer_region_total_sales.show()
+    ```
+
+*   Step 4: Rank Customers within Each Region: Use a window function (`dense_rank()` or `rank()`) partitioned by `region` and ordered by `total_transaction_amount_last_year` in descending order. `dense_rank()` is often preferred here to avoid gaps if multiple customers have the same total amount.
+    ```python
+    window_spec_rank = Window.partitionBy("region").orderBy(col("total_transaction_amount_last_year").desc())
+
+    ranked_customers = customer_region_total_sales.withColumn(
+        "rank_in_region",
+        dense_rank().over(window_spec_rank)
+    )
+    print("\nRanked Customers:")
+    ranked_customers.show()
+    ```
+
+*   Step 5: Filter for Top 5: Finally, filter the `ranked_customers` DataFrame to keep only those with `rank_in_region` less than or equal to 5.
+    ```python
+    top_5_customers_per_region = ranked_customers.filter(col("rank_in_region") <= 5)
+
+    print("\nTop 5 Customers per Region by Total Transaction Amount (Last Year):")
+    top_5_customers_per_region.orderBy("region", "rank_in_region").show()
+
+    spark.stop()
+    ```
+
+
