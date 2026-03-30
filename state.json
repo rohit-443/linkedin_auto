@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "Spark Optimization Techniques (Partitioning, Bucketing, Broadcast Joins)",
     "Spark Memory Management & Internals (Caching, Catalyst Optimizer)",
     "Introduction to Databricks (Workspace, Clusters, DBFS)",
     "Delta Lake Fundamentals (ACID Transactions, Time Travel, Optimize)",
@@ -25,7 +24,8 @@
     "PySpark DataFrame Basics (Schemas, Select, Filter, WithColumn)",
     "PySpark Data Manipulation (Joins, Aggregations, GroupBy, Window Functions)",
     "Reading & Writing Data in PySpark (CSV, JSON, Parquet, Avro, JDBC)",
-    "Spark SQL & User Defined Functions (UDFs, pandas UDFs)"
+    "Spark SQL & User Defined Functions (UDFs, pandas UDFs)",
+    "Spark Optimization Techniques (Partitioning, Bucketing, Broadcast Joins)"
   ],
   "recent_questions": [
     "What is Apache Spark, and why is it popular for big data processing?",
@@ -69,6 +69,13 @@
     "Differentiate between `createOrReplaceTempView` and `createOrReplaceGlobalTempView` in Spark SQL. Explain their respective scopes and typical use cases, demonstrating how to query data using both types of views.",
     "Discuss common performance bottlenecks associated with using both standard and pandas UDFs in PySpark. What are the key strategies to optimize UDF performance, and in which situations might you consider avoiding UDFs altogether in favor of built-in Spark functions or Spark SQL expressions?",
     "You need to use a complex Python library (e.g., `numpy` for advanced mathematical operations) within a PySpark UDF. Explain how you would ensure this library is available to your UDFs when running on a Databricks cluster. Provide a conceptual example of using such a library within a UDF.",
-    "You have a CSV file containing raw sensor data. Describe how you would use Spark SQL to read this CSV, perform a simple data cleaning transformation (e.g., casting a column, filtering), and then write the transformed data into a Delta Lake table, ensuring schema evolution is handled."
+    "You have a CSV file containing raw sensor data. Describe how you would use Spark SQL to read this CSV, perform a simple data cleaning transformation (e.g., casting a column, filtering), and then write the transformed data into a Delta Lake table, ensuring schema evolution is handled.",
+    "Explain how `repartition()` and `coalesce()` impact the number of partitions and data distribution in a PySpark DataFrame. When would you choose one over the other, and what are the performance implications of each?",
+    "Describe the concept of bucketing in PySpark DataFrames and its primary benefits, especially for join performance. Illustrate how to create a bucketed table and explain a scenario where bucketing would significantly outperform a non-bucketed join.",
+    "While broadcast joins are effective, how does Spark determine if a DataFrame is small enough to be broadcasted, and what configuration parameters influence this decision? If Spark doesn't automatically broadcast a small DataFrame, how can you explicitly hint Spark to perform a broadcast join in PySpark?",
+    "Explain how data skew can negatively impact the performance of wide transformations, particularly joins and aggregations. How does Spark's Adaptive Query Execution (AQE) mitigate data skew, specifically in the context of skewed join optimization, and what role does partitioning play here?",
+    "You are processing two large datasets that need to be joined frequently on a common key. Discuss the factors you would consider when deciding whether to use explicit `repartition()` before the join, or to pre-bucket the tables. Under what specific conditions would bucketing be the superior choice, and why?",
+    "You have a very large PySpark DataFrame and need to perform a `groupBy` aggregation on a column with high cardinality. Explain how strategic partitioning *before* the aggregation can significantly improve performance, especially by reducing data shuffle. Provide a PySpark code snippet demonstrating this approach.",
+    "When storing data in Delta Lake (or Parquet), how do file formats and physical organization (like Z-ordering or `OPTIMIZE` with `ZORDER BY`) complement or interact with logical partitioning and bucketing strategies for query performance in Databricks?"
   ]
 }
