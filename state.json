@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "Spark SQL & User Defined Functions (UDFs, pandas UDFs)",
     "Spark Optimization Techniques (Partitioning, Bucketing, Broadcast Joins)",
     "Spark Memory Management & Internals (Caching, Catalyst Optimizer)",
     "Introduction to Databricks (Workspace, Clusters, DBFS)",
@@ -25,7 +24,8 @@
     "PySpark RDD Programming Basics (Transformations vs Actions, Lazy Evaluation)",
     "PySpark DataFrame Basics (Schemas, Select, Filter, WithColumn)",
     "PySpark Data Manipulation (Joins, Aggregations, GroupBy, Window Functions)",
-    "Reading & Writing Data in PySpark (CSV, JSON, Parquet, Avro, JDBC)"
+    "Reading & Writing Data in PySpark (CSV, JSON, Parquet, Avro, JDBC)",
+    "Spark SQL & User Defined Functions (UDFs, pandas UDFs)"
   ],
   "recent_questions": [
     "What is Apache Spark, and why is it popular for big data processing?",
@@ -62,6 +62,13 @@
     "Describe how to connect PySpark to an external relational database (e.g., PostgreSQL, MySQL) using JDBC to read data into a DataFrame. Provide a practical example, including how to specify connection properties and address common considerations like driver availability.",
     "When reading data from semi-structured formats like CSV or JSON, malformed records or data that doesn't conform to the expected schema can cause job failures. Explain how PySpark's `mode` options can handle such scenarios and provide examples of how to use them.",
     "Explain the different write modes (`append`, `overwrite`, `ignore`, `errorifexists`) available when writing PySpark DataFrames to file systems or external tables. Discuss a scenario where `overwrite` with `saveAsTable` might be problematic and how `insertInto` could be a safer alternative for certain use cases.",
-    "How do you read and write data in Avro format using PySpark? Are there any specific configurations or libraries required, especially when comparing a standard Apache Spark cluster with Databricks Runtime?"
+    "How do you read and write data in Avro format using PySpark? Are there any specific configurations or libraries required, especially when comparing a standard Apache Spark cluster with Databricks Runtime?",
+    "Explain the core purpose of a standard PySpark UDF. Discuss its primary limitations, particularly concerning serialization and performance, and demonstrate how to create, register, and use one to calculate a simple derived value.",
+    "Describe the significant performance advantages of pandas UDFs (vectorized UDFs) over traditional row-at-a-time PySpark UDFs. Provide a practical example of a \"Scalar\" pandas UDF to apply a numerical transformation on a column.",
+    "Explain a suitable scenario for using a \"Grouped Map\" pandas UDF. Illustrate with a code example how to implement a Grouped Map UDF to perform a group-wise calculation (e.g., min-max scaling per group).",
+    "Differentiate between `createOrReplaceTempView` and `createOrReplaceGlobalTempView` in Spark SQL. Explain their respective scopes and typical use cases, demonstrating how to query data using both types of views.",
+    "Discuss common performance bottlenecks associated with using both standard and pandas UDFs in PySpark. What are the key strategies to optimize UDF performance, and in which situations might you consider avoiding UDFs altogether in favor of built-in Spark functions or Spark SQL expressions?",
+    "You need to use a complex Python library (e.g., `numpy` for advanced mathematical operations) within a PySpark UDF. Explain how you would ensure this library is available to your UDFs when running on a Databricks cluster. Provide a conceptual example of using such a library within a UDF.",
+    "You have a CSV file containing raw sensor data. Describe how you would use Spark SQL to read this CSV, perform a simple data cleaning transformation (e.g., casting a column, filtering), and then write the transformed data into a Delta Lake table, ensuring schema evolution is handled."
   ]
 }
