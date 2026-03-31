@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "Spark Memory Management & Internals (Caching, Catalyst Optimizer)",
     "Introduction to Databricks (Workspace, Clusters, DBFS)",
     "Delta Lake Fundamentals (ACID Transactions, Time Travel, Optimize)",
     "Delta Lake Advanced (Merge Into, Schema Evolution, CDF)",
@@ -25,15 +24,10 @@
     "PySpark Data Manipulation (Joins, Aggregations, GroupBy, Window Functions)",
     "Reading & Writing Data in PySpark (CSV, JSON, Parquet, Avro, JDBC)",
     "Spark SQL & User Defined Functions (UDFs, pandas UDFs)",
-    "Spark Optimization Techniques (Partitioning, Bucketing, Broadcast Joins)"
+    "Spark Optimization Techniques (Partitioning, Bucketing, Broadcast Joins)",
+    "Spark Memory Management & Internals (Caching, Catalyst Optimizer)"
   ],
   "recent_questions": [
-    "What is Apache Spark, and why is it popular for big data processing?",
-    "Describe the core architecture of Apache Spark.",
-    "Explain the concept of an RDD in Spark. What are its key characteristics and limitations?",
-    "What is a Spark DataFrame, and how does it differ from an RDD? Why should one prefer DataFrames over RDDs?",
-    "Discuss the advantages of using DataFrames/Datasets over RDDs in PySpark, specifically mentioning Catalyst Optimizer and Tungsten.",
-    "How does lazy evaluation work in Spark, and why is it important for performance? Provide an example.",
     "Differentiate between Spark transformations and actions, giving examples of each.",
     "When you apply a series of transformations on an RDD in PySpark, what is the immediate outcome before any action is called? Illustrate with a simple `map` example.",
     "Describe the key characteristics and implications of an RDD action. How does calling an action like `collect()` or `count()` differ fundamentally from a transformation in terms of execution flow?",
@@ -76,6 +70,13 @@
     "Explain how data skew can negatively impact the performance of wide transformations, particularly joins and aggregations. How does Spark's Adaptive Query Execution (AQE) mitigate data skew, specifically in the context of skewed join optimization, and what role does partitioning play here?",
     "You are processing two large datasets that need to be joined frequently on a common key. Discuss the factors you would consider when deciding whether to use explicit `repartition()` before the join, or to pre-bucket the tables. Under what specific conditions would bucketing be the superior choice, and why?",
     "You have a very large PySpark DataFrame and need to perform a `groupBy` aggregation on a column with high cardinality. Explain how strategic partitioning *before* the aggregation can significantly improve performance, especially by reducing data shuffle. Provide a PySpark code snippet demonstrating this approach.",
-    "When storing data in Delta Lake (or Parquet), how do file formats and physical organization (like Z-ordering or `OPTIMIZE` with `ZORDER BY`) complement or interact with logical partitioning and bucketing strategies for query performance in Databricks?"
+    "When storing data in Delta Lake (or Parquet), how do file formats and physical organization (like Z-ordering or `OPTIMIZE` with `ZORDER BY`) complement or interact with logical partitioning and bucketing strategies for query performance in Databricks?",
+    "Explain the various storage levels available when using `persist()` or `cache()` in PySpark. Discuss a scenario where `MEMORY_AND_DISK_SER` would be preferred over `MEMORY_ONLY`, and how Spark's LRU eviction policy works when memory is exhausted.",
+    "Beyond just optimizing `select` and `filter`, describe the main phases of Spark's Catalyst Optimizer. How does it transform a high-level DataFrame operation into an efficient execution plan, and what role does 'predicate pushdown' play in this process?",
+    "What is Project Tungsten, and how does it improve Spark's memory and CPU efficiency? Specifically, explain the concept of off-heap memory in Spark and how it's utilized through Tungsten to reduce garbage collection overhead.",
+    "Describe how Spark manages memory during shuffle operations. What are the key configuration parameters that influence shuffle memory, and how can misconfiguration lead to `OutOfMemoryError` or performance degradation? Provide an example of a parameter you might tune.",
+    "While DataFrames are generally preferred, there are still scenarios where caching RDDs might be considered. Differentiate between caching an RDD and caching a DataFrame in PySpark. Discuss the underlying mechanisms and when you might choose one over the other, considering serialization and Tungsten optimizations.",
+    "Explain the purpose of Broadcast Variables and Accumulators in Spark, focusing on how they interact with Spark's memory model. How do Broadcast Variables help optimize memory usage and network I/O, especially in join operations or when distributing lookup tables?",
+    "When reading large datasets (e.g., Parquet, JSON) into PySpark, how can you strategically define the schema and select specific columns to optimize memory consumption and improve job performance, even before the Catalyst Optimizer fully kicks in? Provide a PySpark example demonstrating selective column reading and schema specification."
   ]
 }
