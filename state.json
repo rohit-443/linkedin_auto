@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "Delta Lake Advanced (Merge Into, Schema Evolution, CDF)",
     "Databricks Unity Catalog (Data Governance, External Locations)",
     "Databricks Workflows & Jobs (Task Dependencies, Job Clusters)",
     "Databricks SQL (Serverless SQL, Dashboards, Queries)",
@@ -25,16 +24,10 @@
     "Spark Optimization Techniques (Partitioning, Bucketing, Broadcast Joins)",
     "Spark Memory Management & Internals (Caching, Catalyst Optimizer)",
     "Introduction to Databricks (Workspace, Clusters, DBFS)",
-    "Delta Lake Fundamentals (ACID Transactions, Time Travel, Optimize)"
+    "Delta Lake Fundamentals (ACID Transactions, Time Travel, Optimize)",
+    "Delta Lake Advanced (Merge Into, Schema Evolution, CDF)"
   ],
   "recent_questions": [
-    "How does Spark's Catalyst Optimizer benefit DataFrame operations like `select` and `filter`? Provide a conceptual overview and an example of an optimization it might perform.",
-    "Explain the different types of joins available in PySpark DataFrames and provide a practical example demonstrating an `inner` and a `left_outer` join.",
-    "How do you perform aggregations on a PySpark DataFrame, both globally and per group? Illustrate with examples using `agg` and `groupBy` to calculate total sales and average quantity per product category.",
-    "Describe the concept of Window Functions in PySpark. Provide an example of how to use a window function to calculate a running total or a moving average within partitions.",
-    "When performing joins in PySpark, what are some common performance considerations and strategies for optimizing large-scale joins, especially regarding data skew? Discuss broadcast joins.",
-    "Differentiate between `groupBy().agg()` and `rollup()` or `cube()` operations in PySpark. When would you choose `rollup()` or `cube()` over a standard `groupBy()`?",
-    "Explain the difference between `row_number()`, `rank()`, and `dense_rank()` window functions in PySpark. Provide a scenario where each would be most appropriate.",
     "You have two large PySpark DataFrames, `transactions` (customer_id, transaction_amount, transaction_date) and `customers` (customer_id, region, registration_date). Design a PySpark job to find the top 5 customers by total transaction amount in each `region` for transactions made in the last year. Explain the steps and the PySpark functions you would use.",
     "When reading a CSV file into a PySpark DataFrame, describe how to handle headers, schema inference, and custom delimiters. Discuss the trade-offs between inferring a schema and providing an explicit one.",
     "You have a PySpark DataFrame and need to persist it to a data lake in Parquet format. Explain how to write the DataFrame, specifying the write mode and partitioning the output by a specific column. Why is Parquet generally preferred over CSV or JSON for analytical workloads in Spark?",
@@ -77,6 +70,13 @@
     "Explain the purpose of `OPTIMIZE` and `ZORDER BY` in Delta Lake. How do they improve query performance, and when would you apply them?",
     "What is the `VACUUM` command in Delta Lake, and why is it important? Discuss its safety implications and the `retention` period.",
     "How can Delta Lake simplify complex data upsert (MERGE) operations, and how does this feature facilitate implementing Slowly Changing Dimensions (SCD Type 2)?",
-    "Beyond explicit `OPTIMIZE`, how does Delta Lake's file organization and statistics (data skipping) contribute to query performance? Discuss how it implicitly handles small files during writes, and when might explicit `OPTIMIZE` still be necessary?"
+    "Beyond explicit `OPTIMIZE`, how does Delta Lake's file organization and statistics (data skipping) contribute to query performance? Discuss how it implicitly handles small files during writes, and when might explicit `OPTIMIZE` still be necessary?",
+    "You have a streaming data pipeline ingesting changes (inserts, updates, deletes) into a Delta Lake table. Describe how you would use the `MERGE INTO` operation to efficiently synchronize these changes, specifically handling soft deletes (marking records as inactive) for existing records and inserting new ones, all within a single transaction. Provide a PySpark example.",
+    "When performing a `MERGE INTO` operation on a Delta Lake table, you encounter incoming data that has new columns not present in the target table. Explain how Delta Lake's schema evolution capabilities can be leveraged to seamlessly integrate these new columns during the `MERGE` operation without failing the job. Provide a PySpark example demonstrating this scenario and the necessary configuration.",
+    "Explain the concept of Delta Lake's Change Data Feed (CDF). Describe a practical use case where CDF would be invaluable for downstream data processing, such as building a materialized view or auditing, and illustrate how to enable and query CDF in PySpark.",
+    "Delta Lake provides strong consistency guarantees and ACID properties. Explain how Delta Lake's optimistic concurrency control mechanism works to ensure transactional isolation, especially in scenarios involving concurrent writes (e.g., multiple jobs trying to `MERGE` or `UPDATE` the same table). How does this differ from traditional data lakes or file systems?",
+    "When querying a large Delta Lake table, explain how Delta Lake's file statistics and transaction log metadata are leveraged by Spark's Catalyst Optimizer to achieve significant query performance improvements, specifically focusing on data skipping and predicate pushdown. Describe how this process reduces the amount of data read from storage.",
+    "You are building a real-time data ingestion pipeline using Spark Structured Streaming to write data into a Delta Lake table. Explain how Delta Lake ensures exactly-once processing guarantees for streaming writes, even in the face of failures or restarts. What mechanisms are in place to achieve this, and how does it simplify stream processing compared to writing to other file formats?",
+    "Describe the key differences and use cases for `DELETE` and `TRUNCATE` operations on a Delta Lake table. How does Delta Lake's architecture (specifically its transaction log) enable these operations efficiently, and what are the implications for time travel and data retention compared to traditional file system approaches?"
   ]
 }

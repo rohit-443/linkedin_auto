@@ -2919,3 +2919,444 @@ spark.stop()
 ```
 
 
+--- Date: 2026-04-01 15:53:16 ---
+Topic: Delta Lake Advanced (Merge Into, Schema Evolution, CDF)
+Description: Level up your #DataEngineering skills! Today, we're diving deep into advanced Delta Lake features like MERGE INTO, Schema Evolution, and Change Data Feed, crucial for building robust and efficient data pipelines. Swipe through these 7 challenging interview questions designed to test your understanding and practical application of Delta Lake's capabilities. Are you ready to ace your next Databricks interview? #interviewprep #delta_lake #pyspark
+
+Q1: You have a streaming data pipeline ingesting changes (inserts, updates, deletes) into a Delta Lake table. Describe how you would use the `MERGE INTO` operation to efficiently synchronize these changes, specifically handling soft deletes (marking records as inactive) for existing records and inserting new ones, all within a single transaction. Provide a PySpark example.
+Solution: The `MERGE INTO` operation in Delta Lake is ideal for efficiently synchronizing changes from a source DataFrame (representing new data or changes) into a target Delta table. To handle soft deletes, we'll introduce a flag (e.g., `is_active`) and update it for records marked for deletion in the source.
+
+Here's how to implement this:
+
+*   Source Data Preparation: Ensure your streaming source DataFrame includes a column indicating the type of change (e.g., 'I' for insert, 'U' for update, 'D' for delete) and potentially a timestamp for ordering changes.
+*   Target Table Schema: The target Delta table should have an `is_active` boolean column, defaulting to `True`, in addition to its primary key and other relevant columns.
+*   `MERGE INTO` Logic: The `MERGE INTO` statement will have multiple `WHEN` clauses:
+    *   `WHEN MATCHED AND source.change_type = 'U'`: Update existing records based on the source data.
+    *   `WHEN MATCHED AND source.change_type = 'D'`: Perform a soft delete by setting `is_active = False` for the matched record.
+    *   `WHEN NOT MATCHED AND source.change_type = 'I'`: Insert new records from the source into the target.
+*   PySpark Implementation: The `delta_table.alias('target').merge()` API is used, chaining the `whenMatchedUpdateAll()`, `whenMatchedUpdate()`, and `whenNotMatchedInsertAll()` methods.
+
+```python
+from pyspark.sql import SparkSession
+from delta.tables import DeltaTable
+from pyspark.sql.functions import lit
+
+spark = SparkSession.builder.appName("DeltaMergeSoftDelete") \
+    .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
+    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
+    .getOrCreate()
+
+# Define Delta table path
+delta_table_path = "/tmp/users_delta_table"
+
+# 1. Create initial Delta table (if not exists)
+spark.range(0).toDF("id") \
+    .withColumn("name", lit("initial")) \
+    .withColumn("email", lit("initial@example.com")) \
+    .withColumn("is_active", lit(True)) \
+    .write \
+    .format("delta") \
+    .mode("overwrite") \
+    .save(delta_table_path)
+
+# 2. Prepare streaming source (example DataFrame representing changes)
+# 'I' = Insert, 'U' = Update, 'D' = Delete (soft delete)
+source_df = spark.createDataFrame([
+    (1, "Alice", "alice@example.com", "U"), # Update Alice's email
+    (2, "Bob", "bob@example.com", "I"),   # Insert Bob
+    (0, "", "", "D")                   # Soft Delete id 0
+], ["id", "name", "email", "change_type"])
+
+# Add an existing record to update for demonstration
+spark.createDataFrame([
+    (0, "John Doe", "john.doe@example.com", True)
+], ["id", "name", "email", "is_active"]) \
+    .write \
+    .format("delta") \
+    .mode("append") \
+    .save(delta_table_path)
+
+# 3. Perform MERGE operation
+deltaTable = DeltaTable.forPath(spark, delta_table_path)
+
+deltaTable.alias("target") \
+    .merge(
+        source_df.alias("source"),
+        "target.id = source.id"
+    )
+    .whenMatchedAnd("source.change_type = 'U'") \
+    .updateAll()
+    .whenMatchedAnd("source.change_type = 'D'") \
+    .update(set = { "is_active": lit(False) })
+    .whenNotMatchedAnd("source.change_type = 'I'") \
+    .insertAll()
+    .execute()
+
+# 4. Verify results
+print("\nAfter MERGE:")
+spark.read.format("delta").load(delta_table_path).orderBy("id").show()
+
+# Expected output would show:
+# - id 0 with is_active = false
+# - id 1 with updated email
+# - id 2 inserted with name Bob
+```
+
+Q2: When performing a `MERGE INTO` operation on a Delta Lake table, you encounter incoming data that has new columns not present in the target table. Explain how Delta Lake's schema evolution capabilities can be leveraged to seamlessly integrate these new columns during the `MERGE` operation without failing the job. Provide a PySpark example demonstrating this scenario and the necessary configuration.
+Solution: Delta Lake's schema evolution allows you to automatically adapt the target table's schema when incoming data contains new columns. For `MERGE INTO` operations, this is particularly powerful as it prevents job failures due to schema mismatches and simplifies pipeline maintenance. The key is to enable the `spark.databricks.delta.schema.autoMerge.enabled` configuration.
+
+*   Automatic Schema Evolution: By setting `spark.databricks.delta.schema.autoMerge.enabled` to `true`, Delta Lake will automatically add new columns present in the source DataFrame to the target Delta table's schema during a `MERGE` operation. Existing columns with different data types will still cause an error, but new columns are handled gracefully.
+*   Column Placement: New columns are typically added to the end of the existing schema. For records where the new column doesn't exist in the source (for `WHEN MATCHED` updates), its value will be `NULL` in the target.
+*   Benefits: This feature significantly reduces the overhead of schema management in dynamic data environments, allowing pipelines to adapt to evolving data sources without manual intervention.
+*   Considerations: While convenient, be mindful of uncontrolled schema growth. It's often best used in controlled environments or with careful monitoring. For more explicit control, `overwriteSchema` can be used with `mode("overwrite")`, but this is not applicable for `MERGE INTO` which is an upsert operation.
+
+```python
+from pyspark.sql import SparkSession
+from delta.tables import DeltaTable
+from pyspark.sql.functions import lit
+
+spark = SparkSession.builder.appName("DeltaMergeSchemaEvolution") \
+    .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
+    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
+    .getOrCreate()
+
+# Define Delta table path
+delta_table_path = "/tmp/products_delta_table"
+
+# 1. Create initial Delta table with a simple schema
+initial_data = spark.createDataFrame([
+    (1, "Laptop", 1200.00),
+    (2, "Mouse", 25.00)
+], ["id", "name", "price"])
+
+initial_data.write \
+    .format("delta") \
+    .mode("overwrite") \
+    .save(delta_table_path)
+
+print("\nInitial Delta table schema and data:")
+spark.read.format("delta").load(delta_table_path).printSchema()
+spark.read.format("delta").load(delta_table_path).show()
+
+# 2. Prepare incoming data with a new column 'category' and an update to 'price'
+# and a new record with 'warranty_months'
+source_data = spark.createDataFrame([
+    (1, "Laptop Pro", 1350.00, "Electronics"), # Update existing, add category
+    (3, "Keyboard", 75.00, "Accessories", 12)  # New record, adds category and warranty_months
+], ["id", "name", "price", "category", "warranty_months"])
+
+# 3. Enable schema auto-merge for MERGE operations
+spark.conf.set("spark.databricks.delta.schema.autoMerge.enabled", "true")
+
+# 4. Perform MERGE operation
+deltaTable = DeltaTable.forPath(spark, delta_table_path)
+
+deltaTable.alias("target") \
+    .merge(
+        source_data.alias("source"),
+        "target.id = source.id"
+    )
+    .whenMatchedUpdateAll()
+    .whenNotMatchedInsertAll()
+    .execute()
+
+# 5. Verify results - schema should have evolved, and data updated/inserted
+print("\nAfter MERGE with schema evolution:")
+spark.read.format("delta").load(delta_table_path).printSchema()
+spark.read.format("delta").load(delta_table_path).orderBy("id").show()
+
+# Expected output would show:
+# - 'category' and 'warranty_months' columns added to the schema
+# - id 1 updated, category for id 1 would be 'Electronics'
+# - id 3 inserted with all columns filled
+```
+
+Q3: Explain the concept of Delta Lake's Change Data Feed (CDF). Describe a practical use case where CDF would be invaluable for downstream data processing, such as building a materialized view or auditing, and illustrate how to enable and query CDF in PySpark.
+Solution: Delta Lake's Change Data Feed (CDF) is a powerful feature that records row-level changes (inserts, updates, deletes) made to a Delta table. Instead of having to reprocess the entire table to detect changes, CDF allows you to efficiently read only the net changes between specified versions or timestamps.
+
+*   How it Works: When CDF is enabled on a Delta table, every transaction that modifies the table (e.g., `INSERT`, `UPDATE`, `DELETE`, `MERGE`) generates a corresponding change data record. These records include the row's data before and after the change, along with metadata indicating the operation type and commit version.
+*   Change Data Columns: CDF output typically includes columns like `_change_type` (e.g., `update_preimage`, `update_postimage`, `delete`, `insert`), `_commit_version`, and `_commit_timestamp`.
+*   Practical Use Case - Materialized View Refresh: Imagine you have a large, complex Delta table (`orders_raw`) and you need to maintain a smaller, aggregated materialized view (`daily_sales_mv`) for reporting. Instead of rebuilding `daily_sales_mv` from scratch or performing complex diffs on `orders_raw` every time, you can use CDF. You would query the CDF of `orders_raw` for changes since the last refresh, apply those changes to `daily_sales_mv`, thus dramatically reducing compute and I/O.
+*   Enabling CDF: CDF is enabled at the table level using a table property. It can be enabled during table creation or on an existing table.
+*   Querying CDF: You can query the change data feed using `spark.read.format("delta")` with `.option("readChangeFeed", "true")` and specifying a version range (`startingVersion`, `endingVersion`) or timestamp range (`startingTimestamp`, `endingTimestamp`).
+
+```python
+from pyspark.sql import SparkSession
+from delta.tables import DeltaTable
+from pyspark.sql.functions import lit
+
+spark = SparkSession.builder.appName("DeltaChangeDataFeed") \
+    .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
+    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
+    .getOrCreate()
+
+# Define Delta table path
+delta_table_path = "/tmp/inventory_delta_table"
+
+# 1. Create an initial Delta table and enable CDF
+spark.sql(f"CREATE TABLE IF NOT EXISTS delta.`{delta_table_path}` (id INT, product STRING, quantity INT) USING DELTA TBLPROPERTIES (delta.enableChangeDataFeed = true)")
+
+# Insert initial data
+spark.sql(f"INSERT INTO delta.`{delta_table_path}` VALUES (1, 'Laptop', 10), (2, 'Monitor', 5)")
+
+# Get current version for starting CDF read later
+initial_version = DeltaTable.forPath(spark, delta_table_path).history().select("version").head()[0]
+print(f"Initial table version: {initial_version}")
+
+# 2. Perform some operations (update, insert, delete)
+spark.sql(f"UPDATE delta.`{delta_table_path}` SET quantity = 8 WHERE id = 1") # Update
+spark.sql(f"INSERT INTO delta.`{delta_table_path}` VALUES (3, 'Keyboard', 20)") # Insert
+spark.sql(f"DELETE FROM delta.`{delta_table_path}` WHERE id = 2") # Delete
+
+# Get current version after changes
+final_version = DeltaTable.forPath(spark, delta_table_path).history().select("version").head()[0]
+print(f"Final table version: {final_version}")
+
+# 3. Query the Change Data Feed from initial_version to final_version
+print("\nChange Data Feed between versions:")
+cdf_df = spark.read.format("delta") \
+    .option("readChangeFeed", "true") \
+    .option("startingVersion", initial_version + 1) \
+    .option("endingVersion", final_version) \
+    .load(delta_table_path)
+
+cdf_df.orderBy("_commit_version", "id", "_change_type").show()
+
+# Expected output will show:
+# - update_preimage for id 1 (quantity 10)
+# - update_postimage for id 1 (quantity 8)
+# - insert for id 3
+# - delete for id 2
+
+# Example of using CDF for a materialized view update (conceptual)
+# latest_cdf_changes = spark.read.format("delta") \
+#     .option("readChangeFeed", "true") \
+#     .option("startingVersion", last_processed_version + 1) \
+#     .load(delta_table_path)
+# Process latest_cdf_changes to update materialized view
+```
+
+Q4: Delta Lake provides strong consistency guarantees and ACID properties. Explain how Delta Lake's optimistic concurrency control mechanism works to ensure transactional isolation, especially in scenarios involving concurrent writes (e.g., multiple jobs trying to `MERGE` or `UPDATE` the same table). How does this differ from traditional data lakes or file systems?
+Solution: Delta Lake employs an optimistic concurrency control mechanism to ensure ACID properties, particularly transactional isolation, even with multiple concurrent writers. This is a fundamental differentiator from traditional data lakes built on open file formats (like Parquet on S3).
+
+*   Mechanism: Optimistic concurrency control assumes that conflicts between concurrent transactions are rare. Each transaction operates on an isolated snapshot of the table. When a transaction attempts to commit, it first validates if the state of the table has changed since it began. If there's a conflict (another transaction committed changes to the same files or partitions), the committing transaction will fail and typically retry.
+*   Transaction Log: The core of this mechanism is the Delta Lake transaction log. Every write operation (insert, update, delete, merge) creates a new commit entry in this log. Before a new write commits, it performs a validation check against the latest version in the transaction log. It checks for file-level conflicts, ensuring that no file it intends to modify or read has been concurrently modified by another transaction.
+*   Conflict Resolution: If a conflict is detected (e.g., two `MERGE` operations try to update the same row), one transaction will succeed, and the other will fail (often with a `ConcurrentModificationException`). Databricks Runtime often includes built-in retry logic for common operations to handle these transient failures gracefully.
+*   Difference from Traditional Data Lakes: Traditional data lakes (e.g., Parquet files on S3/ADLS) lack a transaction log and a mechanism for atomic, consistent updates. Concurrent writes can lead to:
+    *   Lost Updates: One writer overwrites changes made by another.
+    *   Dirty Reads: Readers see partial or inconsistent data.
+    *   Inconsistent State: No single source of truth for the table's state at any given time.
+    *   Delta Lake's optimistic concurrency ensures that transactions are isolated and that readers always see a consistent snapshot of the data, preventing these issues.
+*   Scalability: Optimistic concurrency is highly scalable because transactions don't need to acquire global locks, allowing many writers to operate simultaneously as long as they don't conflict on the same underlying data files.
+
+Q5: When querying a large Delta Lake table, explain how Delta Lake's file statistics and transaction log metadata are leveraged by Spark's Catalyst Optimizer to achieve significant query performance improvements, specifically focusing on data skipping and predicate pushdown. Describe how this process reduces the amount of data read from storage.
+Solution: Delta Lake significantly enhances query performance by providing rich metadata to Spark's Catalyst Optimizer, enabling advanced optimizations like data skipping and improved predicate pushdown. This collaboration drastically reduces the amount of data read from storage, speeding up queries.
+
+*   Transaction Log as Metadata Source: The Delta Lake transaction log stores not just commit information but also detailed statistics about each data file (e.g., min/max values for columns, null counts, number of records). This metadata is updated with every write operation and is immediately available for query planning.
+*   Data Skipping: When a query includes filters (predicates) on certain columns, the Catalyst Optimizer, upon receiving the query plan, consults the Delta transaction log's file statistics. For each data file, it checks if the min/max values for the filtered column overlap with the query's filter range. If a file's min/max range for a column falls entirely outside the filter condition (e.g., `WHERE date > '2023-01-01'` and a file only contains data for `2022`), that entire file can be skipped without being read from storage. This significantly reduces I/O.
+*   Predicate Pushdown: This is a general Spark optimization where filter conditions are 'pushed down' as close to the data source as possible. With Delta Lake, this is enhanced. Instead of reading all data and then filtering in Spark, the Catalyst Optimizer can use the transaction log's knowledge of file contents (like partition values) to eliminate entire partitions or even individual files before any data is scanned. This works even for non-partitioned columns due to data skipping based on min/max stats.
+*   How it Reduces Data Read: By leveraging file statistics and partition information, Catalyst can intelligently identify and prune irrelevant files and partitions. This means only a subset of the actual data files are scanned and read into memory, leading to faster query execution, lower cloud storage costs, and reduced network I/O. This is particularly effective for highly selective queries on large datasets.
+
+```python
+from pyspark.sql import SparkSession
+from delta.tables import DeltaTable
+from pyspark.sql.functions import lit
+
+spark = SparkSession.builder.appName("DeltaDataSkipping") \
+    .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
+    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
+    .getOrCreate()
+
+delta_table_path = "/tmp/sensor_data_delta_table"
+
+# Create a Delta table with some data, including a 'timestamp' column
+# This will generate statistics in the transaction log
+data = [
+    (1, "sensor_A", 25.5, "2023-01-01 10:00:00"),
+    (2, "sensor_B", 30.1, "2023-01-01 10:05:00"),
+    (3, "sensor_A", 26.0, "2023-01-02 11:00:00"),
+    (4, "sensor_C", 22.3, "2023-01-02 11:00:00"),
+    (5, "sensor_B", 31.2, "2023-01-03 12:00:00")
+]
+df = spark.createDataFrame(data, ["id", "device", "temperature", "timestamp"])
+
+df.withColumn("timestamp", df["timestamp"].cast("timestamp")) \
+  .write \
+  .format("delta") \
+  .mode("overwrite") \
+  .save(delta_table_path)
+
+# Add more data, specifically for a later date, to create distinct file ranges
+data_later = [
+    (6, "sensor_A", 27.0, "2023-02-01 09:00:00"),
+    (7, "sensor_C", 23.5, "2023-02-01 09:30:00")
+]
+df_later = spark.createDataFrame(data_later, ["id", "device", "temperature", "timestamp"])
+
+df_later.withColumn("timestamp", df_later["timestamp"].cast("timestamp")) \
+  .write \
+  .format("delta") \
+  .mode("append") \
+  .save(delta_table_path)
+
+# Query with a filter that should benefit from data skipping
+print("\nQuerying data for a specific date range (2023-01-02 to 2023-01-03):")
+query_df = spark.read.format("delta").load(delta_table_path) \
+    .filter("timestamp >= '2023-01-02 00:00:00' AND timestamp < '2023-01-04 00:00:00'")
+
+query_df.show()
+query_df.explain(True) # Look for 'PushedFilters' and 'numFiles' in the plan
+
+# In the 'explain' output, you would observe:
+# - 'PushedFilters' showing the timestamp predicate being applied at the source.
+# - 'numFiles' read would be significantly less than the total number of files if data is well-distributed,
+#   demonstrating data skipping in action by avoiding files outside the filtered range.
+```
+
+Q6: You are building a real-time data ingestion pipeline using Spark Structured Streaming to write data into a Delta Lake table. Explain how Delta Lake ensures exactly-once processing guarantees for streaming writes, even in the face of failures or restarts. What mechanisms are in place to achieve this, and how does it simplify stream processing compared to writing to other file formats?
+Solution: Delta Lake, when integrated with Spark Structured Streaming, provides robust exactly-once processing guarantees for streaming writes. This means every record from the source is processed and written to the Delta table exactly once, preventing data loss or duplication, even if the streaming job fails and restarts.
+
+*   Atomic Transactions: Each micro-batch in Structured Streaming corresponds to a single atomic transaction in Delta Lake. This means either all changes within a micro-batch are successfully committed to the Delta transaction log, or none are. There are no partial writes, ensuring atomicity.
+*   Idempotent Writes: Delta Lake ensures that writing the same data multiple times (e.g., due to a retry after a failure) does not lead to duplicate data in the table. The transaction log tracks the state of each commit, and if a commit for a specific micro-batch ID is already recorded, subsequent attempts to commit the same micro-batch are ignored. This is often achieved through a combination of the checkpoint directory (managed by Structured Streaming) and the Delta transaction log.
+*   Checkpointing: Structured Streaming's checkpointing mechanism stores the progress of the stream (e.g., the last processed offset from the source) and the metadata about committed micro-batches. Upon restart, the stream can resume exactly where it left off, preventing reprocessing of already committed data and ensuring no data is missed.
+*   Simplified Stream Processing: Compared to writing to other file formats (like Parquet or CSV) in a traditional data lake, Delta Lake eliminates the need for complex custom logic to handle idempotency, deduplication, and failure recovery. Without Delta Lake, achieving exactly-once semantics would typically involve:
+    *   Manual tracking of processed offsets.
+    *   Implementing custom deduplication logic (e.g., using a unique ID and a separate state store).
+    *   Developing robust retry mechanisms that account for partial file writes.
+    *   Delta Lake abstracts away these complexities, allowing developers to focus on business logic.
+
+```python
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import current_timestamp, rand, expr
+
+spark = SparkSession.builder.appName("DeltaStreamingExactlyOnce") \
+    .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
+    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
+    .getOrCreate()
+
+# Define Delta table path and checkpoint location
+delta_table_path = "/tmp/streaming_output_delta"
+checkpoint_location = "/tmp/streaming_checkpoint"
+
+# Clear previous runs for demonstration
+spark.sql(f"DROP TABLE IF EXISTS delta.`{delta_table_path}`")
+spark.sql(f"TRUNCATE TABLE delta.`{delta_table_path}`") # To clean up the data files if table already exists
+import shutil
+shutil.rmtree(delta_table_path, ignore_errors=True)
+shutil.rmtree(checkpoint_location, ignore_errors=True)
+
+# 1. Create a streaming source DataFrame (e.g., a rate source for demo)
+streaming_df = spark.readStream \
+    .format("rate") \
+    .option("rowsPerSecond", 1) \
+    .load()
+
+# Add some columns to the streaming data
+processed_df = streaming_df \
+    .withColumn("value_squared", expr("value * value")) \
+    .withColumn("process_time", current_timestamp())
+
+# 2. Write the streaming DataFrame to Delta Lake with append mode
+# The checkpointLocation is crucial for exactly-once guarantees
+query = processed_df.writeStream \
+    .format("delta") \
+    .outputMode("append") \
+    .option("checkpointLocation", checkpoint_location) \
+    .trigger(processingTime='5 seconds') \
+    .toTable(f"delta.`{delta_table_path}`") # Use toTable for easier management
+
+print("Starting streaming query...")
+# Start the query and let it run for a short period
+# In a real scenario, this would run indefinitely or be managed by a job orchestrator
+query.awaitTermination(30) # Run for 30 seconds for demonstration
+query.stop()
+
+print("\nStreaming query stopped. Verifying data in Delta table:")
+spark.read.format("delta").load(delta_table_path).show()
+
+# To simulate failure and restart:
+# 1. Run the above code, let it write some data, then stop it.
+# 2. Rerun the `query.start()` part (or the whole script if you comment out the initial table/checkpoint cleanup).
+#    Delta Lake and Structured Streaming will use the checkpoint to resume correctly,
+#    ensuring no data is lost or duplicated from the original stream.
+```
+
+Q7: Describe the key differences and use cases for `DELETE` and `TRUNCATE` operations on a Delta Lake table. How does Delta Lake's architecture (specifically its transaction log) enable these operations efficiently, and what are the implications for time travel and data retention compared to traditional file system approaches?
+Solution: In Delta Lake, both `DELETE` and `TRUNCATE` remove data, but they differ significantly in their scope, mechanism, and implications for features like time travel and data retention. These operations are enabled efficiently by Delta Lake's transaction log-based architecture.
+
+*   DELETE Operation:
+    *   Scope: Removes specific rows from the table based on a `WHERE` clause. If no `WHERE` clause is provided, it behaves like `TRUNCATE` (removes all rows).
+    *   Mechanism: A `DELETE` operation is a soft delete from the perspective of underlying data files. It identifies the files containing the rows to be deleted, rewrites those files to exclude the deleted rows, and records these changes as a new version in the Delta transaction log. The original files containing the deleted rows are marked for eventual garbage collection by `VACUUM`.
+    *   Time Travel: Yes, `DELETE` operations are fully revertible. You can time travel to a version *before* the delete to retrieve the deleted rows, or even query the table at a specific timestamp before the delete occurred.
+    *   Use Cases: Removing specific erroneous records, GDPR compliance (right to be forgotten), data quality fixes, or when only a subset of data needs to be removed.
+
+*   TRUNCATE Operation:
+    *   Scope: Removes *all* rows from a table. It's an all-or-nothing operation.
+    *   Mechanism: A `TRUNCATE` operation is typically faster than a full table `DELETE` without a `WHERE` clause. Instead of rewriting files, it essentially creates a new empty version in the transaction log, marking all existing data files as logically removed. The underlying files are still present but are no longer considered part of the current table state and are eligible for `VACUUM`.
+    *   Time Travel: Yes, `TRUNCATE` operations are also revertible. You can time travel to a version *before* the `TRUNCATE` to recover the entire table's data.
+    *   Use Cases: Resetting a table for reloading, clearing staging tables, or when a complete dataset refresh is required.
+
+*   Delta Lake's Transaction Log & Efficiency: Both `DELETE` and `TRUNCATE` record their actions as new atomic commits in the transaction log. This is crucial:
+    *   Atomicity: The entire operation (rewriting files for `DELETE`, or marking all files for `TRUNCATE`) is atomic. Either it fully succeeds, or it fully fails, leaving the table in a consistent state.
+    *   Efficiency: For `DELETE`, only affected files are rewritten, not the entire table. For `TRUNCATE`, it's primarily a metadata operation in the log, making it very fast. Contrast this with traditional file systems where deleting files is often a physical operation and `TRUNCATE` might involve manually deleting all files in a directory, which is neither atomic nor time-travel capable.
+    *   Time Travel & Data Retention Implications: Because the transaction log retains a history of all changes, both `DELETE` and `TRUNCATE` preserve the ability to time travel. The actual physical deletion of old data files (including those containing deleted/truncated rows) only happens when `VACUUM` is run, and only after a configurable retention period (default 7 days). This provides a safety net and recovery capability far superior to traditional file systems where deleting files is permanent and irreversible without external backups.
+
+```python
+from pyspark.sql import SparkSession
+from delta.tables import DeltaTable
+from pyspark.sql.functions import lit
+
+spark = SparkSession.builder.appName("DeltaDeleteTruncate") \
+    .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
+    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
+    .getOrCreate()
+
+delta_table_path = "/tmp/employees_delta_table"
+
+# 1. Create initial Delta table
+initial_data = spark.createDataFrame([
+    (1, "Alice", "HR"),
+    (2, "Bob", "IT"),
+    (3, "Charlie", "Finance"),
+    (4, "David", "HR")
+], ["id", "name", "department"])
+
+initial_data.write \
+    .format("delta") \
+    .mode("overwrite") \
+    .save(delta_table_path)
+
+print("\nInitial table content:")
+spark.read.format("delta").load(delta_table_path).show()
+
+# Get current version before DELETE
+version_before_delete = DeltaTable.forPath(spark, delta_table_path).history().select("version").head()[0]
+
+# 2. Perform a DELETE operation
+print("\nDeleting employee with id = 2...")
+spark.sql(f"DELETE FROM delta.`{delta_table_path}` WHERE id = 2")
+
+print("\nTable content after DELETE:")
+spark.read.format("delta").load(delta_table_path).show()
+
+# Time travel back to before the delete
+print(f"\nTable content before DELETE (version {version_before_delete}):")
+spark.read.format("delta").option("versionAsOf", version_before_delete).load(delta_table_path).show()
+
+# Get current version before TRUNCATE
+version_before_truncate = DeltaTable.forPath(spark, delta_table_path).history().select("version").head()[0]
+
+# 3. Perform a TRUNCATE operation
+print("\nTruncating the table...")
+spark.sql(f"TRUNCATE TABLE delta.`{delta_table_path}`")
+
+print("\nTable content after TRUNCATE:")
+spark.read.format("delta").load(delta_table_path).show()
+
+# Time travel back to before the truncate
+print(f"\nTable content before TRUNCATE (version {version_before_truncate}):")
+spark.read.format("delta").option("versionAsOf", version_before_truncate).load(delta_table_path).show()
+
+```
+
+
