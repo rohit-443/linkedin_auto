@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "Databricks Autoloader & Delta Live Tables (DLT)",
     "Machine Learning with PySpark (MLlib, Feature Engineering)",
     "Advanced Databricks Architectures (Medallion Architecture)",
     "PySpark Troubleshooting and Debugging (OOM errors, Spark UI)",
@@ -25,16 +24,10 @@
     "Databricks Unity Catalog (Data Governance, External Locations)",
     "Databricks Workflows & Jobs (Task Dependencies, Job Clusters)",
     "Databricks SQL (Serverless SQL, Dashboards, Queries)",
-    "Structured Streaming in PySpark (Watermarking, Checkpoints)"
+    "Structured Streaming in PySpark (Watermarking, Checkpoints)",
+    "Databricks Autoloader & Delta Live Tables (DLT)"
   ],
   "recent_questions": [
-    "When reading large datasets (e.g., Parquet, JSON) into PySpark, how can you strategically define the schema and select specific columns to optimize memory consumption and improve job performance, even before the Catalyst Optimizer fully kicks in? Provide a PySpark example demonstrating selective column reading and schema specification.",
-    "Explain the core components and purpose of a Databricks Workspace. How does it serve as a unified platform for data engineering, data science, and machine learning?",
-    "Differentiate between \"All-Purpose Clusters\" and \"Job Clusters\" in Databricks. When would you typically use each type, and how does Databricks manage their lifecycle and cost implications?",
-    "What is the Databricks File System (DBFS)? Describe its architecture and how it integrates with underlying cloud object storage. Discuss its key advantages and typical use cases within a Databricks environment.",
-    "You need to access data stored in an external AWS S3 bucket directly from your Databricks notebooks without constantly providing credentials. Explain how to securely mount this S3 bucket to DBFS. Provide a PySpark code snippet demonstrating how to read a Parquet file from this mounted location.",
-    "Databricks Runtime (DBR) is a key differentiator. Explain what Databricks Runtime is and how it enhances standard Apache Spark. Provide at least three specific examples of features or optimizations DBR offers out-of-the-box.",
-    "Describe the process of running a scheduled data processing job in Databricks. How do you create a \"Job\" in Databricks, and what are the benefits of using a Job over running a notebook interactively on an All-Purpose Cluster for production workloads?",
     "You have a PySpark DataFrame `df` containing processed data. Explain how you would write this DataFrame to a specific folder within a mounted ADLS Gen2 location on Databricks in Parquet format, ensuring the write operation is idempotent (i.e., overwrites existing data in that specific folder but doesn't affect other folders).",
     "Explain how Delta Lake guarantees ACID properties for data reliability. Focus on the role of its transaction log and how it enables atomicity and isolation.",
     "How does Delta Lake handle schema changes, and what are the different modes available for schema evolution? Provide a PySpark example demonstrating how to append data with schema evolution.",
@@ -77,6 +70,13 @@
     "In PySpark Structured Streaming, what is the purpose of a `trigger`? Differentiate between `ProcessingTime` and `Once` triggers, explaining their typical use cases and how they impact resource utilization.",
     "Explain how Structured Streaming manages state for operations like `groupBy().agg()` or `mapGroupsWithState`. What challenges arise from managing state in a continuous stream, and how does watermarking specifically address these challenges?",
     "Beyond checkpointing, what other mechanisms and principles contribute to Structured Streaming's end-to-end fault tolerance and its ability to provide exactly-once processing guarantees, even in the face of failures?",
-    "Design a simple PySpark Structured Streaming pipeline in a Databricks environment to ingest data from a Kafka topic, perform a basic transformation (e.g., adding a timestamp and a derived column), and write it to a Delta Lake table. Emphasize how you would configure checkpointing and watermarking for a realistic, fault-tolerant scenario."
+    "Design a simple PySpark Structured Streaming pipeline in a Databricks environment to ingest data from a Kafka topic, perform a basic transformation (e.g., adding a timestamp and a derived column), and write it to a Delta Lake table. Emphasize how you would configure checkpointing and watermarking for a realistic, fault-tolerant scenario.",
+    "Databricks Autoloader simplifies incremental data ingestion from cloud object storage. Explain its core capabilities and how it addresses common challenges faced when ingesting continuously arriving data, especially compared to manual file processing approaches in Spark Structured Streaming.",
+    "Autoloader offers two primary file discovery modes: directory listing and file notification. Describe how each mode works, their respective advantages and disadvantages, and in which scenarios you would choose one over the other.",
+    "Schema evolution is a common challenge in streaming data ingestion. Explain how Databricks Autoloader handles schema inference and evolution. Detail the key options (`cloudFiles.schemaHints`, `cloudFiles.inferSchema`, `cloudFiles.rescuePartitions`, `cloudFiles.schemaLocation`, `mergeSchema`) and provide a PySpark example demonstrating a basic setup with schema inference and evolution.",
+    "Delta Live Tables (DLT) introduces a new paradigm for building reliable ETL pipelines. Explain the fundamental principles of DLT, highlighting its key benefits such as declarative pipeline development, automatic dependency management, and built-in data quality enforcement, contrasting it with traditional hand-coded Spark ETL.",
+    "Data quality is paramount in production data pipelines. Describe how DLT's 'expectations' feature helps enforce data quality rules within a pipeline. Explain the different enforcement policies (e.g., `FAIL`, `DROP`, `QUARANTINE`) and provide a Python DLT example for defining expectations on a streaming table.",
+    "DLT supports both `LIVE` and `STREAMING LIVE` tables. Differentiate between these two table types in terms of their processing model, typical use cases, and how DLT manages their updates. When would you choose a `LIVE` table over a `STREAMING LIVE` table, and vice-versa?",
+    "While DLT emphasizes declarative Python/SQL, you might sometimes need custom logic. Explain how you can leverage Spark SQL and User-Defined Functions (UDFs) within a DLT pipeline. Provide a Python DLT example showing how to define a `LIVE VIEW` that uses a Spark SQL query and potentially a simple UDF (standard or pandas UDF) for a transformation."
   ]
 }
