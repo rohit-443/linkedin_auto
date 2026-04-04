@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "Structured Streaming in PySpark (Watermarking, Checkpoints)",
     "Databricks Autoloader & Delta Live Tables (DLT)",
     "Machine Learning with PySpark (MLlib, Feature Engineering)",
     "Advanced Databricks Architectures (Medallion Architecture)",
@@ -25,16 +24,10 @@
     "Delta Lake Advanced (Merge Into, Schema Evolution, CDF)",
     "Databricks Unity Catalog (Data Governance, External Locations)",
     "Databricks Workflows & Jobs (Task Dependencies, Job Clusters)",
-    "Databricks SQL (Serverless SQL, Dashboards, Queries)"
+    "Databricks SQL (Serverless SQL, Dashboards, Queries)",
+    "Structured Streaming in PySpark (Watermarking, Checkpoints)"
   ],
   "recent_questions": [
-    "When storing data in Delta Lake (or Parquet), how do file formats and physical organization (like Z-ordering or `OPTIMIZE` with `ZORDER BY`) complement or interact with logical partitioning and bucketing strategies for query performance in Databricks?",
-    "Explain the various storage levels available when using `persist()` or `cache()` in PySpark. Discuss a scenario where `MEMORY_AND_DISK_SER` would be preferred over `MEMORY_ONLY`, and how Spark's LRU eviction policy works when memory is exhausted.",
-    "Beyond just optimizing `select` and `filter`, describe the main phases of Spark's Catalyst Optimizer. How does it transform a high-level DataFrame operation into an efficient execution plan, and what role does 'predicate pushdown' play in this process?",
-    "What is Project Tungsten, and how does it improve Spark's memory and CPU efficiency? Specifically, explain the concept of off-heap memory in Spark and how it's utilized through Tungsten to reduce garbage collection overhead.",
-    "Describe how Spark manages memory during shuffle operations. What are the key configuration parameters that influence shuffle memory, and how can misconfiguration lead to `OutOfMemoryError` or performance degradation? Provide an example of a parameter you might tune.",
-    "While DataFrames are generally preferred, there are still scenarios where caching RDDs might be considered. Differentiate between caching an RDD and caching a DataFrame in PySpark. Discuss the underlying mechanisms and when you might choose one over the other, considering serialization and Tungsten optimizations.",
-    "Explain the purpose of Broadcast Variables and Accumulators in Spark, focusing on how they interact with Spark's memory model. How do Broadcast Variables help optimize memory usage and network I/O, especially in join operations or when distributing lookup tables?",
     "When reading large datasets (e.g., Parquet, JSON) into PySpark, how can you strategically define the schema and select specific columns to optimize memory consumption and improve job performance, even before the Catalyst Optimizer fully kicks in? Provide a PySpark example demonstrating selective column reading and schema specification.",
     "Explain the core components and purpose of a Databricks Workspace. How does it serve as a unified platform for data engineering, data science, and machine learning?",
     "Differentiate between \"All-Purpose Clusters\" and \"Job Clusters\" in Databricks. When would you typically use each type, and how does Databricks manage their lifecycle and cost implications?",
@@ -77,6 +70,13 @@
     "You've created several queries in Databricks SQL. How would you combine these queries into an interactive dashboard, and what options are available for sharing it with non-technical business users?",
     "What are some common strategies and tools available within Databricks SQL to troubleshoot and optimize the performance of slow-running queries, especially when dealing with large datasets?",
     "How does Databricks SQL seamlessly integrate with Unity Catalog to provide secure and governed access to data? Explain how permissions defined in Unity Catalog apply when running queries in Databricks SQL.",
-    "A business analyst needs to query a CSV file that's been uploaded to DBFS. Describe the steps a data engineer would take to make this data accessible and queryable via Databricks SQL, ensuring it's properly registered for future use."
+    "A business analyst needs to query a CSV file that's been uploaded to DBFS. Describe the steps a data engineer would take to make this data accessible and queryable via Databricks SQL, ensuring it's properly registered for future use.",
+    "Explain the concept of watermarking in PySpark Structured Streaming. How does it help handle late-arriving data and manage the state of stateful operations? Provide a PySpark code snippet demonstrating its use.",
+    "What is the fundamental role of checkpointing in PySpark Structured Streaming? How does it contribute to fault tolerance and exactly-once processing guarantees? Where are these checkpoints typically stored in a Databricks environment?",
+    "Describe the three main output modes available in PySpark Structured Streaming: `Append`, `Complete`, and `Update`. Explain when you would choose each mode and their implications on the structure of the output.",
+    "In PySpark Structured Streaming, what is the purpose of a `trigger`? Differentiate between `ProcessingTime` and `Once` triggers, explaining their typical use cases and how they impact resource utilization.",
+    "Explain how Structured Streaming manages state for operations like `groupBy().agg()` or `mapGroupsWithState`. What challenges arise from managing state in a continuous stream, and how does watermarking specifically address these challenges?",
+    "Beyond checkpointing, what other mechanisms and principles contribute to Structured Streaming's end-to-end fault tolerance and its ability to provide exactly-once processing guarantees, even in the face of failures?",
+    "Design a simple PySpark Structured Streaming pipeline in a Databricks environment to ingest data from a Kafka topic, perform a basic transformation (e.g., adding a timestamp and a derived column), and write it to a Delta Lake table. Emphasize how you would configure checkpointing and watermarking for a realistic, fault-tolerant scenario."
   ]
 }
