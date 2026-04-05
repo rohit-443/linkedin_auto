@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "Machine Learning with PySpark (MLlib, Feature Engineering)",
     "Advanced Databricks Architectures (Medallion Architecture)",
     "PySpark Troubleshooting and Debugging (OOM errors, Spark UI)",
     "Handling Data Skewness in PySpark",
@@ -25,16 +24,10 @@
     "Databricks Workflows & Jobs (Task Dependencies, Job Clusters)",
     "Databricks SQL (Serverless SQL, Dashboards, Queries)",
     "Structured Streaming in PySpark (Watermarking, Checkpoints)",
-    "Databricks Autoloader & Delta Live Tables (DLT)"
+    "Databricks Autoloader & Delta Live Tables (DLT)",
+    "Machine Learning with PySpark (MLlib, Feature Engineering)"
   ],
   "recent_questions": [
-    "You have a PySpark DataFrame `df` containing processed data. Explain how you would write this DataFrame to a specific folder within a mounted ADLS Gen2 location on Databricks in Parquet format, ensuring the write operation is idempotent (i.e., overwrites existing data in that specific folder but doesn't affect other folders).",
-    "Explain how Delta Lake guarantees ACID properties for data reliability. Focus on the role of its transaction log and how it enables atomicity and isolation.",
-    "How does Delta Lake handle schema changes, and what are the different modes available for schema evolution? Provide a PySpark example demonstrating how to append data with schema evolution.",
-    "Describe Delta Lake's Time Travel feature. How does it work internally, and what are its practical use cases for data engineers?",
-    "Explain the purpose of `OPTIMIZE` and `ZORDER BY` in Delta Lake. How do they improve query performance, and when would you apply them?",
-    "What is the `VACUUM` command in Delta Lake, and why is it important? Discuss its safety implications and the `retention` period.",
-    "How can Delta Lake simplify complex data upsert (MERGE) operations, and how does this feature facilitate implementing Slowly Changing Dimensions (SCD Type 2)?",
     "Beyond explicit `OPTIMIZE`, how does Delta Lake's file organization and statistics (data skipping) contribute to query performance? Discuss how it implicitly handles small files during writes, and when might explicit `OPTIMIZE` still be necessary?",
     "You have a streaming data pipeline ingesting changes (inserts, updates, deletes) into a Delta Lake table. Describe how you would use the `MERGE INTO` operation to efficiently synchronize these changes, specifically handling soft deletes (marking records as inactive) for existing records and inserting new ones, all within a single transaction. Provide a PySpark example.",
     "When performing a `MERGE INTO` operation on a Delta Lake table, you encounter incoming data that has new columns not present in the target table. Explain how Delta Lake's schema evolution capabilities can be leveraged to seamlessly integrate these new columns during the `MERGE` operation without failing the job. Provide a PySpark example demonstrating this scenario and the necessary configuration.",
@@ -77,6 +70,13 @@
     "Delta Live Tables (DLT) introduces a new paradigm for building reliable ETL pipelines. Explain the fundamental principles of DLT, highlighting its key benefits such as declarative pipeline development, automatic dependency management, and built-in data quality enforcement, contrasting it with traditional hand-coded Spark ETL.",
     "Data quality is paramount in production data pipelines. Describe how DLT's 'expectations' feature helps enforce data quality rules within a pipeline. Explain the different enforcement policies (e.g., `FAIL`, `DROP`, `QUARANTINE`) and provide a Python DLT example for defining expectations on a streaming table.",
     "DLT supports both `LIVE` and `STREAMING LIVE` tables. Differentiate between these two table types in terms of their processing model, typical use cases, and how DLT manages their updates. When would you choose a `LIVE` table over a `STREAMING LIVE` table, and vice-versa?",
-    "While DLT emphasizes declarative Python/SQL, you might sometimes need custom logic. Explain how you can leverage Spark SQL and User-Defined Functions (UDFs) within a DLT pipeline. Provide a Python DLT example showing how to define a `LIVE VIEW` that uses a Spark SQL query and potentially a simple UDF (standard or pandas UDF) for a transformation."
+    "While DLT emphasizes declarative Python/SQL, you might sometimes need custom logic. Explain how you can leverage Spark SQL and User-Defined Functions (UDFs) within a DLT pipeline. Provide a Python DLT example showing how to define a `LIVE VIEW` that uses a Spark SQL query and potentially a simple UDF (standard or pandas UDF) for a transformation.",
+    "Explain the concept of ML Pipelines in PySpark MLlib. How do they streamline the machine learning workflow, and what are their key components (Estimators, Transformers, Pipelines)? Provide a simple code example.",
+    "Describe common feature engineering techniques in PySpark, specifically focusing on `StringIndexer`, `OneHotEncoderEstimator`, and `VectorAssembler`. Why are these crucial for machine learning models?",
+    "How do you evaluate machine learning models and perform hyperparameter tuning in PySpark MLlib? Discuss the roles of `CrossValidator` and `ParamGridBuilder`.",
+    "How can Delta Lake be leveraged as a robust feature store for machine learning workflows on Databricks? Discuss benefits like versioning, ACID properties, and time travel for reproducibility.",
+    "How would you set up a real-time (or near real-time) machine learning inference pipeline using PySpark Structured Streaming and a pre-trained MLlib model on Databricks? Consider how Delta Lake could store features or model outputs.",
+    "When would you need to create a custom PySpark MLlib Transformer or Estimator? Explain the steps involved in implementing one.",
+    "Discuss how PySpark MLlib leverages Spark's distributed nature for training large-scale machine learning models. Pick an algorithm like Logistic Regression and briefly explain how its training might be distributed."
   ]
 }
