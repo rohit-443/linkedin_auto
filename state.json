@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "PySpark Troubleshooting and Debugging (OOM errors, Spark UI)",
     "Handling Data Skewness in PySpark",
     "Delta Lake Deletion Vectors",
     "Data Staging Concepts",
@@ -25,16 +24,10 @@
     "Structured Streaming in PySpark (Watermarking, Checkpoints)",
     "Databricks Autoloader & Delta Live Tables (DLT)",
     "Machine Learning with PySpark (MLlib, Feature Engineering)",
-    "Advanced Databricks Architectures (Medallion Architecture)"
+    "Advanced Databricks Architectures (Medallion Architecture)",
+    "PySpark Troubleshooting and Debugging (OOM errors, Spark UI)"
   ],
   "recent_questions": [
-    "Describe the key differences and use cases for `DELETE` and `TRUNCATE` operations on a Delta Lake table. How does Delta Lake's architecture (specifically its transaction log) enable these operations efficiently, and what are the implications for time travel and data retention compared to traditional file system approaches?",
-    "What is Databricks Unity Catalog, and what are its primary benefits for data governance and security in a multi-workspace environment?",
-    "Explain the key components of the Unity Catalog object hierarchy, from Metastore down to Tables/Views/Volumes. How does this hierarchy facilitate data organization and access control?",
-    "Detail the process of securely connecting Unity Catalog to external cloud storage (e.g., ADLS Gen2, S3) using \"External Locations\" and \"Storage Credentials.\" Provide a PySpark example of how you would create an external table pointing to data in such a location.",
-    "Differentiate between Unity Catalog's \"Managed Tables\" and \"External Tables.\" Discuss the lifecycle management of data and metadata for each type, and when you would opt for one over the other.",
-    "Describe Unity Catalog's robust access control model. How do you grant and revoke fine-grained permissions (e.g., `SELECT`, `MODIFY`, `CREATE TABLE`) on catalogs, schemas, and tables to users and groups? Provide a SQL example for granting permissions.",
-    "How does Unity Catalog provide a unified view and governance of data across different Databricks workspaces and even different cloud regions? What challenges does this solve for large enterprises?",
     "Explain how Unity Catalog's `INFORMATION_SCHEMA` can be leveraged for data discovery, auditing, and understanding metadata. Provide a SQL query example to retrieve column details for a specific table.",
     "Databricks Workflows allow orchestration of complex data pipelines. Explain how you would define and manage intricate task dependencies, including conditional execution based on the success or failure of upstream tasks, within a Databricks Workflow. Provide a real-world scenario where conditional execution is critical.",
     "When configuring a Databricks Job, how can you effectively customize its associated Job Cluster to optimize for both performance and cost for a specific workload? Discuss specific configurations you would consider, such as instance types, auto-scaling, and Spark configurations.",
@@ -77,6 +70,13 @@
     "Explain the characteristics and optimization strategies for the Gold layer in the Medallion Architecture. How is this layer typically consumed, and what role do Databricks SQL Warehouses play in its consumption?",
     "How does Delta Lake's Time Travel feature enhance the Medallion Architecture, particularly for auditing, debugging, and reproducing historical states of data at different layers?",
     "Discuss common performance optimization techniques applicable across the Bronze, Silver, and Gold layers of a Medallion Architecture using Delta Lake. Focus on `OPTIMIZE`, `ZORDER`, and Liquid Clustering.",
-    "Imagine a data quality issue is detected in the Gold layer (e.g., duplicate orders). Using Delta Lake features within the Medallion Architecture, how would you identify the source of the issue in the Silver or Bronze layer, correct it, and propagate the fix through to the Gold layer without reprocessing all historical data?"
+    "Imagine a data quality issue is detected in the Gold layer (e.g., duplicate orders). Using Delta Lake features within the Medallion Architecture, how would you identify the source of the issue in the Silver or Bronze layer, correct it, and propagate the fix through to the Gold layer without reprocessing all historical data?",
+    "How do you approach diagnosing and resolving an OutOfMemory (OOM) error in a PySpark application running on Databricks? Differentiate between driver OOM and executor OOM errors.",
+    "You have a PySpark job that is running much slower than expected. How would you use the Spark UI to identify the bottlenecks and diagnose performance issues? Which specific tabs and metrics would you focus on?",
+    "Data skew is a common performance killer in PySpark. Explain what data skew is, how you would identify it using the Spark UI, and provide at least two strategies to mitigate it, illustrating with PySpark code examples.",
+    "You've implemented a PySpark window function to calculate a running total, but the results are incorrect, or the job is extremely slow. How would you debug this, and what common pitfalls should you look out for in terms of correctness and performance?",
+    "Explain the difference between `cache()` and `persist()` in PySpark. When and why would you use them? How would you verify their effectiveness and monitor their usage using the Spark UI?",
+    "You're working with two large PySpark DataFrames that need to be joined, and the join operation is consistently slow. Beyond addressing data skew, what are three common strategies you would employ to optimize this join, and how would you implement them?",
+    "A PySpark job performing a complex `groupBy` and aggregation operation is either producing incorrect results or failing with an OOM error. How would you systematically debug this, covering both correctness and performance aspects?"
   ]
 }
