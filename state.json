@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "Delta Lake Deletion Vectors",
     "Data Staging Concepts",
     "Databricks Auto Loader Deep Dive",
     "Real-world PySpark Scenario Questions"
@@ -25,16 +24,10 @@
     "Machine Learning with PySpark (MLlib, Feature Engineering)",
     "Advanced Databricks Architectures (Medallion Architecture)",
     "PySpark Troubleshooting and Debugging (OOM errors, Spark UI)",
-    "Handling Data Skewness in PySpark"
+    "Handling Data Skewness in PySpark",
+    "Delta Lake Deletion Vectors"
   ],
   "recent_questions": [
-    "Consider a Databricks Workflow where one task performs an incremental `MERGE INTO` operation on a Delta Lake table. After this merge, it's critical to ensure data quality. Describe how you would implement a subsequent task within the workflow to validate data quality (e.g., check for duplicates, referential integrity) and automatically trigger alerts or halt the workflow if critical quality thresholds are not met.",
-    "What is Databricks SQL, and how does it differentiate itself from running SQL queries directly within a PySpark notebook on an All-Purpose Cluster? Focus on the target persona and compute model.",
-    "Explain the concept of Serverless SQL Warehouses in Databricks SQL. What are their key advantages over Pro or Classic SQL Warehouses, particularly regarding operational overhead and cost for fluctuating analytical workloads?",
-    "Describe the process of writing and executing a SQL query against a Delta Lake table in Databricks SQL's Query Editor. How can you explore available tables and schemas?",
-    "You've created several queries in Databricks SQL. How would you combine these queries into an interactive dashboard, and what options are available for sharing it with non-technical business users?",
-    "What are some common strategies and tools available within Databricks SQL to troubleshoot and optimize the performance of slow-running queries, especially when dealing with large datasets?",
-    "How does Databricks SQL seamlessly integrate with Unity Catalog to provide secure and governed access to data? Explain how permissions defined in Unity Catalog apply when running queries in Databricks SQL.",
     "A business analyst needs to query a CSV file that's been uploaded to DBFS. Describe the steps a data engineer would take to make this data accessible and queryable via Databricks SQL, ensuring it's properly registered for future use.",
     "Explain the concept of watermarking in PySpark Structured Streaming. How does it help handle late-arriving data and manage the state of stateful operations? Provide a PySpark code snippet demonstrating its use.",
     "What is the fundamental role of checkpointing in PySpark Structured Streaming? How does it contribute to fault tolerance and exactly-once processing guarantees? Where are these checkpoints typically stored in a Databricks environment?",
@@ -77,6 +70,13 @@
     "In scenarios where one side of a join is significantly smaller but still too large for a standard broadcast, and the larger side exhibits skew, how might you combine strategies or adapt the broadcast join concept to alleviate the skew's impact? Consider the Adaptive Query Execution (AQE) role here.",
     "Data skew can severely impact aggregation performance. Describe a specific technique to handle skew during `groupBy` and `agg` operations in PySpark, such as 'partial aggregation' or 'pre-aggregation with distinct keys'. Provide a code snippet illustrating this.",
     "How does Spark's Adaptive Query Execution (AQE) automatically address data skew during shuffle operations, particularly for join strategies? While AQE can help, when might you still need to manually intervene with skew handling techniques?",
-    "When designing data pipelines that ingest into or query tables managed by Databricks Unity Catalog, how does the presence of data skew influence your table design choices (e.g., partitioning, clustering) or the way you configure external locations, especially concerning performance and cost management?"
+    "When designing data pipelines that ingest into or query tables managed by Databricks Unity Catalog, how does the presence of data skew influence your table design choices (e.g., partitioning, clustering) or the way you configure external locations, especially concerning performance and cost management?",
+    "Delta Lake Deletion Vectors are a significant enhancement for DML operations. Explain the core problem they aim to solve and how they fundamentally alter the underlying mechanism of `DELETE`, `UPDATE`, and `MERGE INTO` operations compared to the traditional copy-on-write approach.",
+    "Beyond just faster DML operations, what are the key benefits that Deletion Vectors bring to Delta Lake tables, particularly in large-scale data engineering workflows? Discuss potential drawbacks or considerations when deciding whether to enable them.",
+    "You are tasked with optimizing a Databricks job that performs frequent, targeted `DELETE` operations on a large Delta table (e.g., a CDC feed or GDPR compliance task). How would you enable Deletion Vectors for this table, and what specific Delta table properties would you configure to fine-tune their behavior for this workload? Provide a PySpark example for enabling and setting relevant properties.",
+    "Deletion Vectors introduce a new file type (`.dv.parquet`) and modify how Delta Lake manages data. Explain how these vectors are tracked within the Delta transaction log and how a Delta reader (e.g., Spark, Databricks SQL) processes both the base data files and the deletion vector files to present a consistent view of the data.",
+    "How do Delta Lake's `OPTIMIZE` and `VACUUM` commands interact with tables that have Deletion Vectors enabled? Specifically, discuss how these commands help manage the lifecycle of deletion vectors and their impact on storage efficiency and read performance over time.",
+    "Consider a Databricks Workflow that orchestrates several tasks, including one that performs continuous `MERGE INTO` operations on a Delta table with Deletion Vectors enabled. How would you design the dependencies and cluster configuration for this workflow to ensure efficient execution, minimize costs, and maintain optimal performance given the presence of Deletion Vectors?",
+    "While Deletion Vectors significantly improve DML performance, are there specific scenarios or query patterns where their presence might actually lead to *decreased* read performance or increased query latency? If so, how would you diagnose such an issue and what mitigation strategies could you employ?"
   ]
 }
