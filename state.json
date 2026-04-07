@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "Handling Data Skewness in PySpark",
     "Delta Lake Deletion Vectors",
     "Data Staging Concepts",
     "Databricks Auto Loader Deep Dive",
@@ -25,16 +24,10 @@
     "Databricks Autoloader & Delta Live Tables (DLT)",
     "Machine Learning with PySpark (MLlib, Feature Engineering)",
     "Advanced Databricks Architectures (Medallion Architecture)",
-    "PySpark Troubleshooting and Debugging (OOM errors, Spark UI)"
+    "PySpark Troubleshooting and Debugging (OOM errors, Spark UI)",
+    "Handling Data Skewness in PySpark"
   ],
   "recent_questions": [
-    "Explain how Unity Catalog's `INFORMATION_SCHEMA` can be leveraged for data discovery, auditing, and understanding metadata. Provide a SQL query example to retrieve column details for a specific table.",
-    "Databricks Workflows allow orchestration of complex data pipelines. Explain how you would define and manage intricate task dependencies, including conditional execution based on the success or failure of upstream tasks, within a Databricks Workflow. Provide a real-world scenario where conditional execution is critical.",
-    "When configuring a Databricks Job, how can you effectively customize its associated Job Cluster to optimize for both performance and cost for a specific workload? Discuss specific configurations you would consider, such as instance types, auto-scaling, and Spark configurations.",
-    "Robust error handling and retry mechanisms are vital for production data pipelines. Describe how to implement these within a Databricks Workflow to ensure resilience and minimize manual intervention for transient failures. How can you configure alerts for different job outcomes?",
-    "Databricks Workflows often need to interact with external systems or secure data sources. How can a Databricks Workflow integrate with external orchestration tools (e.g., Airflow, Azure Data Factory) or external data sources/sinks that require specific credentials or network configurations? Focus on secure credential management within the workflow context.",
-    "Explain the key benefits of using a *newly created Job Cluster per run* within a Databricks Workflow for production ETL jobs, as opposed to running tasks on a persistent All-Purpose cluster. Focus on isolation, cost optimization, and environment consistency.",
-    "How do Databricks Repos enhance the development, version control, and deployment of Databricks Workflows, particularly regarding CI/CD practices and collaborative development?",
     "Consider a Databricks Workflow where one task performs an incremental `MERGE INTO` operation on a Delta Lake table. After this merge, it's critical to ensure data quality. Describe how you would implement a subsequent task within the workflow to validate data quality (e.g., check for duplicates, referential integrity) and automatically trigger alerts or halt the workflow if critical quality thresholds are not met.",
     "What is Databricks SQL, and how does it differentiate itself from running SQL queries directly within a PySpark notebook on an All-Purpose Cluster? Focus on the target persona and compute model.",
     "Explain the concept of Serverless SQL Warehouses in Databricks SQL. What are their key advantages over Pro or Classic SQL Warehouses, particularly regarding operational overhead and cost for fluctuating analytical workloads?",
@@ -77,6 +70,13 @@
     "You've implemented a PySpark window function to calculate a running total, but the results are incorrect, or the job is extremely slow. How would you debug this, and what common pitfalls should you look out for in terms of correctness and performance?",
     "Explain the difference between `cache()` and `persist()` in PySpark. When and why would you use them? How would you verify their effectiveness and monitor their usage using the Spark UI?",
     "You're working with two large PySpark DataFrames that need to be joined, and the join operation is consistently slow. Beyond addressing data skew, what are three common strategies you would employ to optimize this join, and how would you implement them?",
-    "A PySpark job performing a complex `groupBy` and aggregation operation is either producing incorrect results or failing with an OOM error. How would you systematically debug this, covering both correctness and performance aspects?"
+    "A PySpark job performing a complex `groupBy` and aggregation operation is either producing incorrect results or failing with an OOM error. How would you systematically debug this, covering both correctness and performance aspects?",
+    "Describe how data skew manifests in PySpark applications and its specific impact on different types of Spark transformations (e.g., joins, aggregations). How does this impact resource utilization and overall job completion time?",
+    "While the Spark UI is crucial for post-mortem analysis, what are other programmatic or statistical methods you might employ to detect potential data skew *before* running a full job, or to confirm it post-mortem beyond just looking at task durations?",
+    "Explain the 'salting' technique for mitigating data skew in join operations. Provide a PySpark code example demonstrating how to implement a salting strategy for a skewed join, and discuss its trade-offs.",
+    "In scenarios where one side of a join is significantly smaller but still too large for a standard broadcast, and the larger side exhibits skew, how might you combine strategies or adapt the broadcast join concept to alleviate the skew's impact? Consider the Adaptive Query Execution (AQE) role here.",
+    "Data skew can severely impact aggregation performance. Describe a specific technique to handle skew during `groupBy` and `agg` operations in PySpark, such as 'partial aggregation' or 'pre-aggregation with distinct keys'. Provide a code snippet illustrating this.",
+    "How does Spark's Adaptive Query Execution (AQE) automatically address data skew during shuffle operations, particularly for join strategies? While AQE can help, when might you still need to manually intervene with skew handling techniques?",
+    "When designing data pipelines that ingest into or query tables managed by Databricks Unity Catalog, how does the presence of data skew influence your table design choices (e.g., partitioning, clustering) or the way you configure external locations, especially concerning performance and cost management?"
   ]
 }
