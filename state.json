@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "Data Staging Concepts",
     "Databricks Auto Loader Deep Dive",
     "Real-world PySpark Scenario Questions"
   ],
@@ -25,16 +24,10 @@
     "Advanced Databricks Architectures (Medallion Architecture)",
     "PySpark Troubleshooting and Debugging (OOM errors, Spark UI)",
     "Handling Data Skewness in PySpark",
-    "Delta Lake Deletion Vectors"
+    "Delta Lake Deletion Vectors",
+    "Data Staging Concepts"
   ],
   "recent_questions": [
-    "A business analyst needs to query a CSV file that's been uploaded to DBFS. Describe the steps a data engineer would take to make this data accessible and queryable via Databricks SQL, ensuring it's properly registered for future use.",
-    "Explain the concept of watermarking in PySpark Structured Streaming. How does it help handle late-arriving data and manage the state of stateful operations? Provide a PySpark code snippet demonstrating its use.",
-    "What is the fundamental role of checkpointing in PySpark Structured Streaming? How does it contribute to fault tolerance and exactly-once processing guarantees? Where are these checkpoints typically stored in a Databricks environment?",
-    "Describe the three main output modes available in PySpark Structured Streaming: `Append`, `Complete`, and `Update`. Explain when you would choose each mode and their implications on the structure of the output.",
-    "In PySpark Structured Streaming, what is the purpose of a `trigger`? Differentiate between `ProcessingTime` and `Once` triggers, explaining their typical use cases and how they impact resource utilization.",
-    "Explain how Structured Streaming manages state for operations like `groupBy().agg()` or `mapGroupsWithState`. What challenges arise from managing state in a continuous stream, and how does watermarking specifically address these challenges?",
-    "Beyond checkpointing, what other mechanisms and principles contribute to Structured Streaming's end-to-end fault tolerance and its ability to provide exactly-once processing guarantees, even in the face of failures?",
     "Design a simple PySpark Structured Streaming pipeline in a Databricks environment to ingest data from a Kafka topic, perform a basic transformation (e.g., adding a timestamp and a derived column), and write it to a Delta Lake table. Emphasize how you would configure checkpointing and watermarking for a realistic, fault-tolerant scenario.",
     "Databricks Autoloader simplifies incremental data ingestion from cloud object storage. Explain its core capabilities and how it addresses common challenges faced when ingesting continuously arriving data, especially compared to manual file processing approaches in Spark Structured Streaming.",
     "Autoloader offers two primary file discovery modes: directory listing and file notification. Describe how each mode works, their respective advantages and disadvantages, and in which scenarios you would choose one over the other.",
@@ -77,6 +70,13 @@
     "Deletion Vectors introduce a new file type (`.dv.parquet`) and modify how Delta Lake manages data. Explain how these vectors are tracked within the Delta transaction log and how a Delta reader (e.g., Spark, Databricks SQL) processes both the base data files and the deletion vector files to present a consistent view of the data.",
     "How do Delta Lake's `OPTIMIZE` and `VACUUM` commands interact with tables that have Deletion Vectors enabled? Specifically, discuss how these commands help manage the lifecycle of deletion vectors and their impact on storage efficiency and read performance over time.",
     "Consider a Databricks Workflow that orchestrates several tasks, including one that performs continuous `MERGE INTO` operations on a Delta table with Deletion Vectors enabled. How would you design the dependencies and cluster configuration for this workflow to ensure efficient execution, minimize costs, and maintain optimal performance given the presence of Deletion Vectors?",
-    "While Deletion Vectors significantly improve DML performance, are there specific scenarios or query patterns where their presence might actually lead to *decreased* read performance or increased query latency? If so, how would you diagnose such an issue and what mitigation strategies could you employ?"
+    "While Deletion Vectors significantly improve DML performance, are there specific scenarios or query patterns where their presence might actually lead to *decreased* read performance or increased query latency? If so, how would you diagnose such an issue and what mitigation strategies could you employ?",
+    "Why is a dedicated data staging area crucial in a modern data pipeline, especially when working with diverse data sources and complex transformations in Databricks/PySpark? What problems does it solve compared to directly loading data into a final target table?",
+    "When designing a staging layer for raw, ingested data using Delta Lake on Databricks, what are the key considerations for table properties and schema definition? How does Delta Lake's features (e.g., schema enforcement/evolution, ACID properties) specifically benefit this initial staging?",
+    "Describe how you would design a PySpark job to handle incremental data ingestion into a staging layer, ensuring idempotency and avoiding duplicate records upon reprocessing. Provide a simple PySpark code example demonstrating a common pattern for this.",
+    "Before data moves from a raw staging area to a more refined layer, data quality checks are essential. How would you implement common data validation rules (e.g., null checks, uniqueness, referential integrity) using PySpark within a staging pipeline? How can you handle records that fail these validations?",
+    "The raw staging layer often accumulates many small files, especially with frequent micro-batching. Explain the \"small file problem\" in Spark/Delta Lake and how it impacts performance in a staging environment. How would you mitigate this using PySpark and Delta Lake features to optimize subsequent reads from this staging layer?",
+    "Imagine you have a large fact table in a refined staging layer and need to enrich it by joining with several relatively small, but frequently updated, dimension tables (e.g., product lookup, customer type). How would you optimize these lookups in PySpark, specifically considering the staging context? When is a broadcast join an appropriate strategy, and what are its considerations?",
+    "Data sources can change their schemas over time. How would you design your PySpark data ingestion pipeline to gracefully handle schema evolution (e.g., new columns, changed data types, dropped columns) when loading into a Delta Lake staging table, minimizing pipeline failures and data loss?"
   ]
 }
