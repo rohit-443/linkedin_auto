@@ -1,7 +1,5 @@
 {
-  "pending_topics": [
-    "Real-world PySpark Scenario Questions"
-  ],
+  "pending_topics": [],
   "covered_topics": [
     "Introduction to Apache Spark & PySpark (Architecture, RDD vs DataFrame)",
     "PySpark RDD Programming Basics (Transformations vs Actions, Lazy Evaluation)",
@@ -25,16 +23,10 @@
     "Handling Data Skewness in PySpark",
     "Delta Lake Deletion Vectors",
     "Data Staging Concepts",
-    "Databricks Auto Loader Deep Dive"
+    "Databricks Auto Loader Deep Dive",
+    "Real-world PySpark Scenario Questions"
   ],
   "recent_questions": [
-    "While DLT emphasizes declarative Python/SQL, you might sometimes need custom logic. Explain how you can leverage Spark SQL and User-Defined Functions (UDFs) within a DLT pipeline. Provide a Python DLT example showing how to define a `LIVE VIEW` that uses a Spark SQL query and potentially a simple UDF (standard or pandas UDF) for a transformation.",
-    "Explain the concept of ML Pipelines in PySpark MLlib. How do they streamline the machine learning workflow, and what are their key components (Estimators, Transformers, Pipelines)? Provide a simple code example.",
-    "Describe common feature engineering techniques in PySpark, specifically focusing on `StringIndexer`, `OneHotEncoderEstimator`, and `VectorAssembler`. Why are these crucial for machine learning models?",
-    "How do you evaluate machine learning models and perform hyperparameter tuning in PySpark MLlib? Discuss the roles of `CrossValidator` and `ParamGridBuilder`.",
-    "How can Delta Lake be leveraged as a robust feature store for machine learning workflows on Databricks? Discuss benefits like versioning, ACID properties, and time travel for reproducibility.",
-    "How would you set up a real-time (or near real-time) machine learning inference pipeline using PySpark Structured Streaming and a pre-trained MLlib model on Databricks? Consider how Delta Lake could store features or model outputs.",
-    "When would you need to create a custom PySpark MLlib Transformer or Estimator? Explain the steps involved in implementing one.",
     "Discuss how PySpark MLlib leverages Spark's distributed nature for training large-scale machine learning models. Pick an algorithm like Logistic Regression and briefly explain how its training might be distributed.",
     "Explain the Medallion Architecture in Databricks. What are its core principles, and how does it address common challenges in data lakehouse implementations?",
     "Describe the Bronze layer within the Medallion Architecture. What are its primary characteristics, and what role does Delta Lake play in making this layer robust and reliable for raw data ingestion?",
@@ -77,6 +69,13 @@
     "How does Auto Loader guarantee exactly-once processing and fault tolerance despite failures or restarts? Explain the role of the checkpoint location.",
     "You're ingesting millions of small files continuously using Auto Loader. What configuration options and strategies would you employ to optimize performance and cost for this high-volume, low-latency scenario?",
     "After deploying an Auto Loader stream, how would you monitor its health, progress, and identify potential issues or backlogs? What tools and metrics are available in Databricks?",
-    "How can Auto Loader be integrated into a pipeline that stages data for consumption by Databricks SQL users, especially when working with Unity Catalog? Discuss security and governance aspects."
+    "How can Auto Loader be integrated into a pipeline that stages data for consumption by Databricks SQL users, especially when working with Unity Catalog? Discuss security and governance aspects.",
+    "You are tasked with ingesting and processing semi-structured data (e.g., complex JSON) that frequently contains nested arrays and structs, and its schema can evolve over time (e.g., new fields added, existing fields changing types). Describe your PySpark strategy for robustly handling this ingestion, flattening the data, and gracefully managing schema evolution within the DataFrame transformations. How does Databricks Unity Catalog play a role in managing the resulting table?",
+    "A critical PySpark batch job, processing several terabytes of data daily, is experiencing severe performance degradation due to a specific section involving multiple complex window functions (e.g., calculating running totals, ranks, or differences over large partitions). Describe a systematic approach to diagnose and optimize the performance of these window functions.",
+    "You are building a daily data pipeline that ingests full snapshots from an external system into a Delta Lake table on Databricks. The requirement is to perform an idempotent upsert: new records should be inserted, and existing records should be updated only if their values have changed. How would you implement this efficiently and idempotently using PySpark and Delta Lake's `MERGE INTO` operation, ensuring data quality and consistency?",
+    "Your Databricks workspace serves a diverse set of users and workloads, including interactive data exploration by analysts, scheduled ETL batch jobs, and occasional machine learning model training. The monthly cloud bill is consistently high, and cost optimization has become a priority. How would you systematically approach reducing costs for these varied PySpark and Databricks workloads, leveraging Databricks-specific features and best practices?",
+    "You manage a Databricks Unity Catalog environment with multiple Delta Lake tables containing sensitive customer data. Different departments and user groups (e.g., 'Finance', 'Marketing', 'Support') require varying levels of access: some need full access to specific tables, others only aggregated views, some need masked PII, and some require access only to data relevant to their region. How would you implement this fine-grained access control using Unity Catalog's capabilities?",
+    "A PySpark Structured Streaming job continuously ingests data and writes micro-batches to a Delta Lake table. Over time, you observe that query performance on this Delta table is degrading significantly, and a quick check reveals a very large number of small files in the table's underlying storage. Explain the 'small file problem' in this streaming context and detail how you would mitigate it using PySpark and Delta Lake features to restore optimal query performance.",
+    "A critical PySpark batch job frequently fails in production due to various transient issues, such as temporary network glitches when reading from an external API, occasional malformed records in a batch, or temporary unavailability of a dependent service. Describe how you would design this PySpark job to be more resilient, handle these errors gracefully, and ensure data quality and eventual job completion, minimizing manual intervention."
   ]
 }
