@@ -1,6 +1,5 @@
 {
   "pending_topics": [
-    "Databricks Auto Loader Deep Dive",
     "Real-world PySpark Scenario Questions"
   ],
   "covered_topics": [
@@ -25,16 +24,10 @@
     "PySpark Troubleshooting and Debugging (OOM errors, Spark UI)",
     "Handling Data Skewness in PySpark",
     "Delta Lake Deletion Vectors",
-    "Data Staging Concepts"
+    "Data Staging Concepts",
+    "Databricks Auto Loader Deep Dive"
   ],
   "recent_questions": [
-    "Design a simple PySpark Structured Streaming pipeline in a Databricks environment to ingest data from a Kafka topic, perform a basic transformation (e.g., adding a timestamp and a derived column), and write it to a Delta Lake table. Emphasize how you would configure checkpointing and watermarking for a realistic, fault-tolerant scenario.",
-    "Databricks Autoloader simplifies incremental data ingestion from cloud object storage. Explain its core capabilities and how it addresses common challenges faced when ingesting continuously arriving data, especially compared to manual file processing approaches in Spark Structured Streaming.",
-    "Autoloader offers two primary file discovery modes: directory listing and file notification. Describe how each mode works, their respective advantages and disadvantages, and in which scenarios you would choose one over the other.",
-    "Schema evolution is a common challenge in streaming data ingestion. Explain how Databricks Autoloader handles schema inference and evolution. Detail the key options (`cloudFiles.schemaHints`, `cloudFiles.inferSchema`, `cloudFiles.rescuePartitions`, `cloudFiles.schemaLocation`, `mergeSchema`) and provide a PySpark example demonstrating a basic setup with schema inference and evolution.",
-    "Delta Live Tables (DLT) introduces a new paradigm for building reliable ETL pipelines. Explain the fundamental principles of DLT, highlighting its key benefits such as declarative pipeline development, automatic dependency management, and built-in data quality enforcement, contrasting it with traditional hand-coded Spark ETL.",
-    "Data quality is paramount in production data pipelines. Describe how DLT's 'expectations' feature helps enforce data quality rules within a pipeline. Explain the different enforcement policies (e.g., `FAIL`, `DROP`, `QUARANTINE`) and provide a Python DLT example for defining expectations on a streaming table.",
-    "DLT supports both `LIVE` and `STREAMING LIVE` tables. Differentiate between these two table types in terms of their processing model, typical use cases, and how DLT manages their updates. When would you choose a `LIVE` table over a `STREAMING LIVE` table, and vice-versa?",
     "While DLT emphasizes declarative Python/SQL, you might sometimes need custom logic. Explain how you can leverage Spark SQL and User-Defined Functions (UDFs) within a DLT pipeline. Provide a Python DLT example showing how to define a `LIVE VIEW` that uses a Spark SQL query and potentially a simple UDF (standard or pandas UDF) for a transformation.",
     "Explain the concept of ML Pipelines in PySpark MLlib. How do they streamline the machine learning workflow, and what are their key components (Estimators, Transformers, Pipelines)? Provide a simple code example.",
     "Describe common feature engineering techniques in PySpark, specifically focusing on `StringIndexer`, `OneHotEncoderEstimator`, and `VectorAssembler`. Why are these crucial for machine learning models?",
@@ -77,6 +70,13 @@
     "Before data moves from a raw staging area to a more refined layer, data quality checks are essential. How would you implement common data validation rules (e.g., null checks, uniqueness, referential integrity) using PySpark within a staging pipeline? How can you handle records that fail these validations?",
     "The raw staging layer often accumulates many small files, especially with frequent micro-batching. Explain the \"small file problem\" in Spark/Delta Lake and how it impacts performance in a staging environment. How would you mitigate this using PySpark and Delta Lake features to optimize subsequent reads from this staging layer?",
     "Imagine you have a large fact table in a refined staging layer and need to enrich it by joining with several relatively small, but frequently updated, dimension tables (e.g., product lookup, customer type). How would you optimize these lookups in PySpark, specifically considering the staging context? When is a broadcast join an appropriate strategy, and what are its considerations?",
-    "Data sources can change their schemas over time. How would you design your PySpark data ingestion pipeline to gracefully handle schema evolution (e.g., new columns, changed data types, dropped columns) when loading into a Delta Lake staging table, minimizing pipeline failures and data loss?"
+    "Data sources can change their schemas over time. How would you design your PySpark data ingestion pipeline to gracefully handle schema evolution (e.g., new columns, changed data types, dropped columns) when loading into a Delta Lake staging table, minimizing pipeline failures and data loss?",
+    "Explain Databricks Auto Loader. What problem does it solve, and what are its primary advantages over traditional batch ingestion methods using `spark.read` for cloud storage?",
+    "Describe the two main operational modes of Auto Loader (file notification vs. directory listing). When would you choose one over the other, and what are the trade-offs?",
+    "Auto Loader is known for its robust schema evolution capabilities. Detail how Auto Loader handles schema changes in incoming data, specifically explaining the role of `cloudFiles.schemaLocation`, `cloudFiles.schemaHints`, and `cloudFiles.rescueDataColumn`. Provide a PySpark example.",
+    "How does Auto Loader guarantee exactly-once processing and fault tolerance despite failures or restarts? Explain the role of the checkpoint location.",
+    "You're ingesting millions of small files continuously using Auto Loader. What configuration options and strategies would you employ to optimize performance and cost for this high-volume, low-latency scenario?",
+    "After deploying an Auto Loader stream, how would you monitor its health, progress, and identify potential issues or backlogs? What tools and metrics are available in Databricks?",
+    "How can Auto Loader be integrated into a pipeline that stages data for consumption by Databricks SQL users, especially when working with Unity Catalog? Discuss security and governance aspects."
   ]
 }
